@@ -5,7 +5,7 @@ import {
   type ChangeEvent
 } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { App } from "@capacitor/app";  // ✅ Correct import
+import { App } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 
 import {
@@ -3171,10 +3171,11 @@ export default function App() {
     };
 
   /* ==========================================================
-   * ANDROID BACK BUTTON HANDLER
+   * ANDROID BACK BUTTON HANDLER (SAFE FOR WEB)
    * ========================================================== */
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
+
     const handler = () => {
       if (location.pathname !== "/") {
         navigate(-1);
@@ -3184,13 +3185,22 @@ export default function App() {
         setLandingScrollPos(window.scrollY);
         setTimeout(() => window.scrollTo(0, landingScrollPos), 50);
       } else {
-        // Optionally exit the app
+        // Optionally exit the app (only works natively)
         // App.exitApp();
       }
     };
-    const listener = App.addListener("backButton", handler);
+
+    let listener: any = null;
+    try {
+      listener = App.addListener("backButton", handler);
+    } catch (e) {
+      // Ignore if not available (web fallback)
+    }
+
     return () => {
-      listener.remove();
+      if (listener && typeof listener.remove === 'function') {
+        listener.remove();
+      }
     };
   }, [location, navigate, mode, landingScrollPos]);
 
