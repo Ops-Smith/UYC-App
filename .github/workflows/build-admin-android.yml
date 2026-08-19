@@ -28,17 +28,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: unique-youths-admin/package-lock.json
 
-      # ✅ Use Java 17 and set it as the default for the whole job
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-          java-package: jdk
-          architecture: x64
-
-      # ✅ Force JAVA_HOME environment variable for Gradle
-      - name: Set JAVA_HOME
-        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
       - name: Verify Java version
         run: java -version
@@ -84,6 +77,21 @@ jobs:
           else
             echo "Android platform already exists, skipping add."
           fi
+
+      # ✅ FIX: Change Java compatibility to 17
+      - name: Fix Java compatibility to Java 17
+        working-directory: unique-youths-admin/android
+        run: |
+          echo "=== Original build.gradle ==="
+          cat app/build.gradle | grep -E "sourceCompatibility|targetCompatibility|compileOptions" || echo "No compatibility settings found"
+          
+          # Replace Java 21 with Java 17
+          sed -i 's/sourceCompatibility = JavaVersion.VERSION_21/sourceCompatibility = JavaVersion.VERSION_17/g' app/build.gradle
+          sed -i 's/targetCompatibility = JavaVersion.VERSION_21/targetCompatibility = JavaVersion.VERSION_17/g' app/build.gradle
+          sed -i 's/JavaVersion.VERSION_21/JavaVersion.VERSION_17/g' app/build.gradle
+          
+          echo "=== Patched build.gradle ==="
+          cat app/build.gradle | grep -E "sourceCompatibility|targetCompatibility|compileOptions" || echo "No compatibility settings found"
 
       - name: Copy icon for asset generation
         run: |
