@@ -1,53 +1,5 @@
 name: Build Admin Android APK
 
-# Builds the admin web app, wraps it in the Capacitor Android shell, and
-# produces a real, installable APK - then publishes it to a separate
-# GitHub Release, so there's a stable download link for the admin app.
-#
-# The admin Android project is generated during the workflow itself, so
-# Android Studio or a locally installed Android SDK is not required on the
-# development machine. GitHub Actions provides the Android build
-# environment and Gradle builds the APK.
-#
-# ---------------------------------------------------------------------
-# ONE-TIME SETUP (do this once in the GitHub repo before the first run):
-# ---------------------------------------------------------------------
-# 1. Repo Settings -> Secrets and variables -> Actions -> Variables tab
-#    - Add ADMIN_APP_URL = the public URL your admin app is deployed to
-#      (e.g. https://unique-youths-admin.onrender.com). The APK is a
-#      WebView shell pointing at this live site - it always shows whatever
-#      is currently deployed there, no separate mobile build to keep in
-#      sync.
-#
-#    - BACKEND_API_URL should already exist for the client workflow and
-#      should point to the public backend API URL.
-#
-#    - CLIENT_APP_URL should already exist if the admin web app uses it
-#      for its "View member dashboard feed" link.
-#
-# 2. (Optional but recommended) To produce a properly *signed* release APK
-#    instead of a debug-signed one, add these repo Secrets:
-#      ADMIN_ANDROID_KEYSTORE_BASE64
-#        - `base64 -w0 your-admin-release-key.keystore`
-#      ADMIN_ANDROID_KEYSTORE_PASSWORD
-#      ADMIN_ANDROID_KEY_ALIAS
-#      ADMIN_ANDROID_KEY_PASSWORD
-#
-#    Generate a separate admin keystore locally if you don't have one:
-#      keytool -genkeypair -v \
-#        -keystore admin-release.keystore \
-#        -alias uniqueyouthsadmin \
-#        -keyalg RSA -keysize 2048 -validity 10000
-#
-#    Keep that keystore file somewhere safe outside git - losing it means
-#    you can never publish an update under the same admin app identity again.
-#
-#    Without these secrets, the workflow still runs and produces a
-#    debug-signed APK, which installs and works fine for testing/sideloading
-#    - Android will just show a generic "developer" signature instead of
-#    your own.
-# ---------------------------------------------------------------------
-
 on:
   push:
     branches:
@@ -79,7 +31,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"   # ✅ Capacitor requires Java 21
 
       - uses: android-actions/setup-android@v4
 
@@ -135,6 +87,13 @@ jobs:
         run: npx cap sync android
         env:
           ADMIN_APP_URL: ${{ vars.ADMIN_APP_URL }}
+
+      # ✅ NEW: Upgrade Gradle wrapper to a version that supports Java 21
+      - name: Upgrade Gradle wrapper
+        working-directory: unique-youths-admin/android
+        run: |
+          chmod +x gradlew
+          ./gradlew wrapper --gradle-version 8.10
 
       - name: Decode signing keystore (if configured)
         id: signing
