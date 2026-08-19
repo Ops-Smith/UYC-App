@@ -441,7 +441,7 @@ function PayoutSummaryCard({
 
       <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
         Maintenance fee follows the circle-size rule:
-        ₦500 × ceil(circle size ÷ 2).
+        ₦500 × max(3, ceil(circle size ÷ 2)) × 2.
       </p>
     </div>
   );
