@@ -20,7 +20,7 @@
 //    charged to each selected recipient.
 //
 // 6. Maintenance fee scales with the size of the circle:
-//      ₦500 × ceil(circle size / 2)
+//      ₦500 × max(3, ceil(circle size ÷ 2)) × 2
 //
 //    Examples:
 //      4 members  = ₦1,000 each

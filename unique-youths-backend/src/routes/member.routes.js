@@ -1191,7 +1191,7 @@ router.get(
           DEFAULT_RECIPIENTS_PER_MONTH,
 
         maintenanceFeeFormula:
-          "₦500 × ceil(circle size ÷ 2)"
+          "₦500 × max(3, ceil(circle size ÷ 2)) × 2"
       }
     });
   }
@@ -1878,7 +1878,7 @@ router.get(
         DEFAULT_RECIPIENTS_PER_MONTH,
 
       MAINTENANCE_FEE_FORMULA:
-        "₦500 × ceil(circle size ÷ 2)"
+        "₦500 × max(3, ceil(circle size ÷ 2)) × 2"
     });
   }
 );
