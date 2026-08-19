@@ -189,7 +189,7 @@ export default function ProfitMatrix({ token, refreshKey }: { token: string; ref
                 {getFeeScaleDisplay(circleSize)}
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                Formula: ₦500 × ceil({circleSize} ÷ 2) = {naira(getMaintenanceFee(circleSize))}
+                Formula: ₦500 × max(3, ceil(circle size ÷ 2)) × 2 = {naira(getMaintenanceFee(circleSize))}
               </p>
             </div>
             {grossPayout > 0 && netPayout > 0 && (
