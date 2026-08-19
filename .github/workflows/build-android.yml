@@ -76,6 +76,11 @@ jobs:
         working-directory: ./unique-youths-client
         run: npm install
 
+      - name: Install Capacitor
+        run: |
+          npm install @capacitor/core @capacitor/android @capacitor/app
+          npm install --save-dev @capacitor/cli
+
       - name: Build web app
         working-directory: ./unique-youths-client
         run: npm run build

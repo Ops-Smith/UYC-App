@@ -86,7 +86,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Capacitor
+      - name: Install Capacitor and assets generator
         run: |
           npm install @capacitor/core @capacitor/android
           npm install --save-dev @capacitor/cli @capacitor/assets
@@ -115,19 +115,21 @@ jobs:
           export default config;
           EOF
 
-      - name: Add Android platform
-        run: npx cap add android
-      
-     # NEW: copy icon to default asset location
+      - name: Add Android platform (if not exists)
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          else
+            echo "Android platform already exists, skipping add."
+          fi
+
       - name: Copy icon for asset generation
         run: |
           mkdir -p assets
           cp public/assets/icon.png assets/icon.png
-       
-     # NEW: generate all Android icons & splash
+
       - name: Generate Android assets (icons & splash)
         run: npx capacitor-assets generate
-
 
       - name: Sync Capacitor Android project
         run: npx cap sync android
