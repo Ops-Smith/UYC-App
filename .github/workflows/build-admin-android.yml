@@ -81,8 +81,8 @@ jobs:
           # Remove any trailing spaces
           sed -i 's/[ \t]*$//' gradle/wrapper/gradle-wrapper.properties
 
-      # Force Java 21 compatibility by rewriting app/build.gradle
-      - name: Force Java 21 compatibility
+      # Force Java 21 compatibility and resolve Kotlin duplicate class conflicts
+      - name: Force Java 21 compatibility & Kotlin alignment
         working-directory: unique-youths-admin/android
         run: |
           cat > app/build.gradle <<'EOF'
@@ -111,6 +111,14 @@ jobs:
               compileOptions {
                   sourceCompatibility JavaVersion.VERSION_21
                   targetCompatibility JavaVersion.VERSION_21
+              }
+          }
+
+          configurations.all {
+              resolutionStrategy.eachDependency { details ->
+                  if (details.requested.group == 'org.jetbrains.kotlin') {
+                      details.useVersion '1.8.10'
+                  }
               }
           }
 
