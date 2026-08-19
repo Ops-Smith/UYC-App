@@ -22,7 +22,7 @@ export default defineConfig({
             if (id.includes("@capacitor")) {
               return "capacitor";
             }
-          }
+          },
           // Split specific pages/components safely using path matching
           if (id.includes("src/pages/Dashboard")) {
             return "page-dashboard";
