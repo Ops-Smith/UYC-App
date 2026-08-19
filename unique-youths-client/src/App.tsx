@@ -21,6 +21,7 @@ import {
 } from "@capgo/capacitor-native-biometric";
 
 import { api } from "./lib/api";
+import { LandingPage } from "./components/LandingPage";
 
 /* ============================================================
  * APP CONTENT
@@ -1451,6 +1452,101 @@ function Card({
 }
 
 /* ============================================================
+ * RULES MODAL (Moved outside ProfilePage for stable identity)
+ * ============================================================ */
+
+function RulesModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white dark:bg-slate-900 border-b dark:border-slate-700 px-6 py-4 flex items-center justify-between z-10">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              Community Rules & Governance
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              By remaining in this community, you agree to these rules – the same ones you accepted when you registered.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center font-black transition"
+          >
+            ×
+          </button>
+        </div>
+        <div className="p-6 sm:p-8 space-y-5 text-sm sm:text-base text-slate-700 dark:text-slate-200">
+          <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900">
+            <h3 className="font-bold text-blue-800 dark:text-blue-300 mb-2">📌 Payment Reporting Process (Updated)</h3>
+            <p>
+              When you click the <strong>"I've paid for this month"</strong> button on your dashboard, your report is
+              immediately sent to the Admin panel with a <strong>"Payment reported — awaiting confirmation"</strong> status.
+              <br /><br />
+              <strong>If the Admin confirms your proof:</strong> Your payment is permanently recorded in the system, and your dashboard will show a green <strong>"Confirmed"</strong> badge.
+              <br /><br />
+              <strong>If the Admin rejects your proof:</strong> Your dashboard will show <strong>"Payment report needs attention"</strong> along with the Admin's reason. You can check the reason, fix the issue, and report the payment again.
+              <br /><br />
+              <em className="text-slate-500 dark:text-slate-400">Your Ledger record is only created when an Admin manually confirms your payment.</em>
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">1. Monthly Contribution</h3>
+            <p>₦11,000 every month – ₦10,000 into the shared pot, ₦1,000 into the party/Owambe fund.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">2. Payment Deadline</h3>
+            <p>The 5th of every month. Paying after the 5th automatically attracts a flat ₦4,000 late fee – no exceptions, no negotiation.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">3. How to Pay</h3>
+            <p>Send your contribution to the admin’s account (details pinned separately/shared privately), then post a clear screenshot of the transfer in Payment Proofs – make sure your name, amount, and date are visible. The admin confirms it in the app once verified; check your own dashboard to see it reflected.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">4. Payouts</h3>
+            <p>
+              Each month, one or two eligible members are randomly selected to receive a lump‑sum payout from the savings pot.
+              The gross payout per recipient is the total savings pot (the ₦10,000 savings portion actually paid by members that month) divided by the number of selected recipients.
+              A maintenance fee is deducted from each gross payout. The fee scales based on your circle size. For example: 4 members = ₦1,500 fee per winner, 6 members = ₦1,800 fee per winner, 8 members = ₦3,100 fee per winner, 10 members = ₦3,400 fee per winner, 12 members = ₦3,700 fee per winner, 14 members = ₦4,000 fee per winner, and 16 to 20 members = a fixed ₦5,000 fee per winner.
+              The actual amounts vary each month based on how many members have paid and the size of your circle. The net payout you receive is the gross payout minus this maintenance fee.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">5. Respect</h3>
+            <p>No insults, harassment, or disrespect toward any member or admin, here or in the app. This is a trust-based financial community – treat it that way.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">6. No Spam</h3>
+            <p>No unrelated adverts, forwarded chain messages, links, or promotional content in any group. Repeated violations get you removed.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">7. Disputes</h3>
+            <p>Raise any disagreement about a payment or payout privately with an admin, not in the group. Admins have final say, consistent with what’s recorded in the app.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">8. Privacy</h3>
+            <p>Don’t screenshot or share another member’s personal details, phone number, or payment history outside this community.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">9. Missed Payments</h3>
+            <p>Persistent non-payment is a breach of what you agreed to at registration and may result in removal from the circle and the community – your nominated guarantor may be contacted.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">10. Leaving the Circle Early</h3>
+            <p>If you must exit before your circle completes, speak to an admin directly – do not just stop paying or leave the group silently.</p>
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg">11. Official Records</h3>
+            <p>This WhatsApp community is a companion to the official app. The app’s records are the official record of who has paid and who has been paid out – this group is for proof-sharing and communication, not the source of truth.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
  * MAIN APP
  * ============================================================ */
 
@@ -1470,20 +1566,19 @@ export default function App() {
     setTheme
   ] = useTheme();
 
+  // MODIFIED: mode now accepts "" (landing page) and defaults to ""
   const [
     mode,
     setMode
   ] =
     useState<
       "register" |
-        "login"
-    >(
-      localStorage.getItem(
-        HAS_REGISTERED_KEY
-      )
-        ? "login"
-        : "register"
-    );
+        "login" |
+        ""
+    >("");
+
+  // NEW: store the scroll position when leaving the landing page
+  const [landingScrollPos, setLandingScrollPos] = useState(0);
 
   const [
     msg,
@@ -1638,6 +1733,14 @@ export default function App() {
       return false;
     }
   });
+
+  // ============================================================
+  // FIXED: ADDED MISSING STATE FOR REAL-TIME POLLING
+  // ============================================================
+  const [
+    isPaymentReportingOpen,
+    setIsPaymentReportingOpen
+  ] = useState(true);
 
   const drawPollRef =
     useRef<
@@ -2923,6 +3026,78 @@ export default function App() {
       }
     };
 
+  const reportMonthlyPayment =
+    async () => {
+      if (!memberToken) {
+        return;
+      }
+
+      const payment =
+        dashboard?.currentMonthPayment;
+
+      if (
+        payment?.status ===
+        "paid"
+      ) {
+        return;
+      }
+
+      if (
+        payment?.status ===
+        "reported"
+      ) {
+        setMsg(
+          `Your ${payment.month} payment is already awaiting administrator confirmation.`
+        );
+
+        return;
+      }
+
+      const confirmed =
+        window.confirm(
+          `Have you paid your ${payment?.month || "current month"} contribution of ₦11,000? Only confirm this after the payment has been made and your proof/receipt has been sent to the admin via WhatsApp.`
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        setError("");
+        setMsg("");
+
+        const result =
+          await api(
+            "/api/member/payment-claims/current",
+            {
+              method:
+                "POST",
+
+              headers: {
+                Authorization:
+                  `Bearer ${memberToken}`,
+
+                "Content-Type":
+                  "application/json"
+              }
+            }
+          );
+
+        setMsg(
+          result.message
+        );
+
+        await loadDashboard();
+      } catch (
+        e: any
+      ) {
+        setError(
+          e.message ||
+          "Unable to report your payment right now."
+        );
+      }
+    };
+
   const login =
     async () => {
       try {
@@ -3121,6 +3296,26 @@ export default function App() {
     memberToken
   ]);
 
+  // ============================================================
+  // FIXED: POLL PAYMENT WINDOW STATUS FROM BACKEND
+  // ============================================================
+  useEffect(() => {
+    if (!memberToken) return;
+    const fetchStatus = async () => {
+      try {
+        const res = await api('/api/member/settings/payment-reporting', {
+          headers: { Authorization: `Bearer ${memberToken}` }
+        });
+        setIsPaymentReportingOpen(res.open === true);
+      } catch {
+        setIsPaymentReportingOpen(true);
+      }
+    };
+    fetchStatus();
+    const id = setInterval(fetchStatus, 4000);
+    return () => clearInterval(id);
+  }, [memberToken]);
+
   const onLogout =
     async () => {
       clearDrawTimers();
@@ -3178,794 +3373,842 @@ export default function App() {
   if (
     !memberToken
   ) {
-    const goPersonalContinue =
-      () => {
-        setError("");
+    // If we are in login or registration mode, show the existing forms
+    if (mode === 'login' || mode === 'register') {
+      const goPersonalContinue =
+        () => {
+          setError("");
 
-        if (
-          form.password.length <
-          8
-        ) {
-          setError(
-            "Password must be at least 8 characters."
-          );
+          if (
+            form.password.length <
+            8
+          ) {
+            setError(
+              "Password must be at least 8 characters."
+            );
 
-          return;
-        }
+            return;
+          }
 
-        if (
-          form.password !==
-          confirmPassword
-        ) {
-          setError(
-            "Passwords do not match. Please re-type your confirmation."
-          );
+          if (
+            form.password !==
+            confirmPassword
+          ) {
+            setError(
+              "Passwords do not match. Please re-type your confirmation."
+            );
 
-          return;
-        }
+            return;
+          }
 
-        setStep(1);
-      };
+          setStep(1);
+        };
 
-    return (
-      <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-        <header className="bg-blue-800 text-white px-3 sm:px-5 py-3 sm:py-4 flex justify-between items-center gap-3 flex-wrap">
-          <Brand />
+      return (
+        <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+          <header className="bg-blue-800 text-white px-3 sm:px-5 py-3 sm:py-4 flex justify-between items-center gap-3 flex-wrap">
+            <Brand />
 
-          <div className="flex items-center gap-2 ml-auto">
-            <ThemeToggle
-              theme={
-                theme
-              }
-              setTheme={
-                setTheme
-              }
-            />
-
-            <div className="flex gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(
-                    "login"
-                  );
-
-                  setError("");
-                  setMsg("");
-                }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold ${
-                  mode ===
-                  "login"
-                    ? "bg-white text-blue-800"
-                    : "bg-blue-700 text-blue-100"
-                }`}
-              >
-                Log In
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  resetWizard();
-                  setMode(
-                    "register"
-                  );
-                }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold ${
-                  mode ===
-                  "register"
-                    ? "bg-white text-blue-800"
-                    : "bg-blue-700 text-blue-100"
-                }`}
-              >
-                Register
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <section className="bg-blue-50 dark:bg-slate-900 p-5 sm:p-6 text-center">
-          <div className="max-w-xl mx-auto">
-            <div className="min-h-48 flex flex-col justify-center">
-              <h1 className="text-2xl sm:text-3xl font-black text-blue-800 dark:text-blue-300">
-                {
-                  slides[
-                    slide
-                  ].title
+            <div className="flex items-center gap-2 ml-auto">
+              <ThemeToggle
+                theme={
+                  theme
                 }
-              </h1>
-
-              <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                {
-                  slides[
-                    slide
-                  ].text
+                setTheme={
+                  setTheme
                 }
-              </p>
-            </div>
+              />
 
-            <div className="flex justify-center gap-2">
-              {slides.map(
-                (_, i) => (
-                  <span
-                    key={i}
-                    className={`h-2 w-8 rounded ${
-                      i ===
-                      slide
-                        ? "bg-red-600"
-                        : "bg-blue-200 dark:bg-slate-700"
-                    }`}
-                  />
-                )
-              )}
-            </div>
-          </div>
-        </section>
-
-        <main className="max-w-2xl mx-auto p-3 sm:p-5">
-          {mode ===
-          "login" ? (
-            <>
-              {msg && (
-                <div className="p-3 mb-3 rounded bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300">
-                  {msg}
-                </div>
-              )}
-
-              {error && (
-                <div className="p-3 mb-3 rounded bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300">
-                  {error}
-                </div>
-              )}
-
-              <Panel title="Log in to your account">
-                <form
-                  onSubmit={e => {
-                    e.preventDefault();
-                    login();
+              <div className="flex gap-1.5 sm:gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode(
+                      "login"
+                    );
+                    window.scrollTo(0, 0);
+                    setError("");
+                    setMsg("");
                   }}
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold ${
+                    mode ===
+                    "login"
+                      ? "bg-white text-blue-800"
+                      : "bg-blue-700 text-blue-100"
+                  }`}
                 >
-                  <Input
-                    label="Email or username"
-                    value={
-                      loginForm.usernameOrEmail
-                    }
-                    onChange={(
-                      v: string
-                    ) => {
-                      setLoginForm({
-                        ...loginForm,
-                        usernameOrEmail:
-                          v
-                      });
+                  Log In
+                </button>
 
-                      setError("");
-                    }}
-                    autoComplete="username"
-                  />
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetWizard();
+                    setMode(
+                      "register"
+                    );
+                    window.scrollTo(0, 0);
+                  }}
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold ${
+                    mode ===
+                    "register"
+                      ? "bg-white text-blue-800"
+                      : "bg-blue-700 text-blue-100"
+                  }`}
+                >
+                  Register
+                </button>
+              </div>
+            </div>
+          </header>
 
-                  <PasswordInput
-                    label="Password"
-                    value={
-                      loginForm.password
-                    }
-                    onChange={(
-                      v: string
-                    ) => {
-                      setLoginForm({
-                        ...loginForm,
-                        password:
-                          v
-                      });
+          {/* Back to Home button – now restores saved scroll position */}
+          <div className="max-w-2xl mx-auto px-3 sm:px-5 pt-4">
+            <button
+              type="button"
+              onClick={() => {
+                setMode("");
+                // Restore the saved scroll position after re-render
+                setTimeout(() => {
+                  window.scrollTo(0, landingScrollPos);
+                }, 50);
+              }}
+              className="text-base sm:text-lg font-bold text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 transition flex items-center gap-2"
+            >
+              <span className="text-xl">←</span> Back to Home
+            </button>
+          </div>
 
-                      setError("");
-                    }}
-                    enterKeyHint="go"
-                  />
+          <section className="bg-blue-50 dark:bg-slate-900 p-5 sm:p-6 text-center">
+            <div className="max-w-xl mx-auto">
+              <div className="min-h-48 flex flex-col justify-center">
+                <h1 className="text-2xl sm:text-3xl font-black text-blue-800 dark:text-blue-300">
+                  {
+                    slides[
+                      slide
+                    ].title
+                  }
+                </h1>
 
-                  <button
-                    type="submit"
-                    className="btn"
-                    disabled={
-                      biometricBusy
-                    }
-                  >
-                    Log in
-                  </button>
-                </form>
-
-                {isNativeAndroidApp() ? (
-                  nativeBiometricAvailable && (
-                    <div className="mt-5 pt-5 border-t dark:border-slate-700">
-                      <div className="text-center">
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                          Fingerprint login
-                        </p>
-
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                          Use the fingerprint registered on
-                          this Android device to securely
-                          sign in.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={
-                          biometricLogin
-                        }
-                        disabled={
-                          biometricBusy ||
-                          !biometricEnabled
-                        }
-                        className="mt-3 w-full border-2 border-blue-800 dark:border-blue-500 text-blue-800 dark:text-blue-300 font-bold py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-50"
-                      >
-                        {biometricBusy
-                          ? "Waiting for fingerprint..."
-                          : "Log in with fingerprint"}
-                      </button>
-
-                      {!biometricEnabled && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 text-center">
-                          First log in with your password,
-                          then enable fingerprint login from
-                          your profile.
-                        </p>
-                      )}
-                    </div>
-                  )
-                ) : (
-                  webAuthnSupported && (
-                    <div className="mt-5 pt-5 border-t dark:border-slate-700">
-                      <div className="text-center">
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                          Biometric / passkey login
-                        </p>
-
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                          Use your fingerprint, Face ID,
-                          Windows Hello, or another
-                          supported device authenticator.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={
-                          biometricLogin
-                        }
-                        disabled={
-                          biometricBusy ||
-                          !biometricEnabled
-                        }
-                        className="mt-3 w-full border-2 border-blue-800 dark:border-blue-500 text-blue-800 dark:text-blue-300 font-bold py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-50"
-                      >
-                        {biometricBusy
-                          ? "Waiting for biometric verification..."
-                          : "Log in with biometrics / passkey"}
-                      </button>
-
-                      {!biometricEnabled && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 text-center">
-                          First log in normally, then enable
-                          biometric/passkey login from your
-                          profile.
-                        </p>
-                      )}
-                    </div>
-                  )
-                )}
-
-                <div className="text-center mt-4">
-                  <button
-                    type="button"
-                    className="text-sm text-blue-700 dark:text-blue-300 underline"
-                    onClick={() =>
-                      setShowForgot(
-                        s => !s
-                      )
-                    }
-                  >
-                    Forgot password?
-                  </button>
-
-                  {showForgot && (
-                    <p className="text-sm text-slate-500 dark:text-slate-300 mt-2">
-                      There's no self-service
-                      password reset yet.
-                      Contact an administrator
-                      directly.
-                    </p>
-                  )}
-                </div>
-
-                <p className="text-center text-sm text-slate-500 dark:text-slate-300 mt-4">
-                  New here?{" "}
-                  <button
-                    type="button"
-                    className="text-blue-700 dark:text-blue-300 font-semibold underline"
-                    onClick={() => {
-                      resetWizard();
-                      setMode(
-                        "register"
-                      );
-                    }}
-                  >
-                    Register instead
-                  </button>
+                <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-400">
+                  {
+                    slides[
+                      slide
+                    ].text
+                  }
                 </p>
-              </Panel>
-            </>
-          ) : (
-            <>
-              <div className="flex justify-between mb-5 text-xs font-bold flex-wrap gap-2">
-                {STEP_LABELS.map(
-                  (x, i) => (
+              </div>
+
+              <div className="flex justify-center gap-2">
+                {slides.map(
+                  (_, i) => (
                     <span
-                      className={
-                        step ===
-                        i
-                          ? "text-red-600"
-                          : "text-slate-400 dark:text-slate-500"
-                      }
-                      key={x}
-                    >
-                      {i + 1}. {x}
-                    </span>
+                      key={i}
+                      className={`h-2 w-8 rounded ${
+                        i ===
+                        slide
+                          ? "bg-red-600"
+                          : "bg-blue-200 dark:bg-slate-700"
+                      }`}
+                    />
                   )
                 )}
               </div>
+            </div>
+          </section>
 
-              {msg && (
-                <div className="p-3 mb-3 rounded bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300">
-                  {msg}
-                </div>
-              )}
+          <main className="max-w-2xl mx-auto p-3 sm:p-5">
+            {mode ===
+            "login" ? (
+              <>
+                {msg && (
+                  <div className="p-3 mb-3 rounded bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300">
+                    {msg}
+                  </div>
+                )}
 
-              {error && (
-                <div className="p-3 mb-3 rounded bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300">
-                  {error}
-                </div>
-              )}
+                {error && (
+                  <div className="p-3 mb-3 rounded bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300">
+                    {error}
+                  </div>
+                )}
 
-              {step === 0 && (
-                <Panel title="Personal information">
-                  {[
-                    "firstName",
-                    "lastName",
-                    "username",
-                    "email",
-                    "primaryPhone"
-                  ].map(k => (
+                <Panel title="Log in to your account">
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault();
+                      login();
+                    }}
+                  >
                     <Input
-                      key={k}
-                      label={k}
+                      label="Email or username"
                       value={
-                        form[k]
+                        loginForm.usernameOrEmail
+                      }
+                      onChange={(
+                        v: string
+                      ) => {
+                        setLoginForm({
+                          ...loginForm,
+                          usernameOrEmail:
+                            v
+                        });
+
+                        setError("");
+                      }}
+                      autoComplete="username"
+                    />
+
+                    <PasswordInput
+                      label="Password"
+                      value={
+                        loginForm.password
+                      }
+                      onChange={(
+                        v: string
+                      ) => {
+                        setLoginForm({
+                          ...loginForm,
+                          password:
+                            v
+                        });
+
+                        setError("");
+                      }}
+                      enterKeyHint="go"
+                    />
+
+                    <button
+                      type="submit"
+                      className="btn"
+                      disabled={
+                        biometricBusy
+                      }
+                    >
+                      Log in
+                    </button>
+                  </form>
+
+                  {isNativeAndroidApp() ? (
+                    nativeBiometricAvailable && (
+                      <div className="mt-5 pt-5 border-t dark:border-slate-700">
+                        <div className="text-center">
+                          <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                            Fingerprint login
+                          </p>
+
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            Use the fingerprint registered on
+                            this Android device to securely
+                            sign in.
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={
+                            biometricLogin
+                          }
+                          disabled={
+                            biometricBusy ||
+                            !biometricEnabled
+                          }
+                          className="mt-3 w-full border-2 border-blue-800 dark:border-blue-500 text-blue-800 dark:text-blue-300 font-bold py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-50"
+                        >
+                          {biometricBusy
+                            ? "Waiting for fingerprint..."
+                            : "Log in with fingerprint"}
+                        </button>
+
+                        {!biometricEnabled && (
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 text-center">
+                            First log in with your password,
+                            then enable fingerprint login from
+                            your profile.
+                          </p>
+                        )}
+                      </div>
+                    )
+                  ) : (
+                    webAuthnSupported && (
+                      <div className="mt-5 pt-5 border-t dark:border-slate-700">
+                        <div className="text-center">
+                          <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                            Biometric / passkey login
+                          </p>
+
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            Use your fingerprint, Face ID,
+                            Windows Hello, or another
+                            supported device authenticator.
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={
+                            biometricLogin
+                          }
+                          disabled={
+                            biometricBusy ||
+                            !biometricEnabled
+                          }
+                          className="mt-3 w-full border-2 border-blue-800 dark:border-blue-500 text-blue-800 dark:text-blue-300 font-bold py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-50"
+                        >
+                          {biometricBusy
+                            ? "Waiting for biometric verification..."
+                            : "Log in with biometrics / passkey"}
+                        </button>
+
+                        {!biometricEnabled && (
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 text-center">
+                            First log in normally, then enable
+                            biometric/passkey login from your
+                            profile.
+                          </p>
+                        )}
+                      </div>
+                    )
+                  )}
+
+                  <div className="text-center mt-4">
+                    <button
+                      type="button"
+                      className="text-sm text-blue-700 dark:text-blue-300 underline"
+                      onClick={() =>
+                        setShowForgot(
+                          s => !s
+                        )
+                      }
+                    >
+                      Forgot password?
+                    </button>
+
+                    {showForgot && (
+                      <p className="text-sm text-slate-500 dark:text-slate-300 mt-2">
+                        There's no self-service
+                        password reset yet.
+                        Contact an administrator
+                        directly.
+                      </p>
+                    )}
+                  </div>
+
+                  <p className="text-center text-sm text-slate-500 dark:text-slate-300 mt-4">
+                    New here?{" "}
+                    <button
+                      type="button"
+                      className="text-blue-700 dark:text-blue-300 font-semibold underline"
+                      onClick={() => {
+                        resetWizard();
+                        setMode(
+                          "register"
+                        );
+                        window.scrollTo(0, 0);
+                      }}
+                    >
+                      Register instead
+                    </button>
+                  </p>
+                </Panel>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between mb-5 text-xs font-bold flex-wrap gap-2">
+                  {STEP_LABELS.map(
+                    (x, i) => (
+                      <span
+                        className={
+                          step ===
+                          i
+                            ? "text-red-600"
+                            : "text-slate-400 dark:text-slate-500"
+                        }
+                        key={x}
+                      >
+                        {i + 1}. {x}
+                      </span>
+                    )
+                  )}
+                </div>
+
+                {msg && (
+                  <div className="p-3 mb-3 rounded bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300">
+                    {msg}
+                  </div>
+                )}
+
+                {error && (
+                  <div className="p-3 mb-3 rounded bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300">
+                    {error}
+                  </div>
+                )}
+
+                {step === 0 && (
+                  <Panel title="Personal information">
+                    {[
+                      "firstName",
+                      "lastName",
+                      "username",
+                      "email",
+                      "primaryPhone"
+                    ].map(k => (
+                      <Input
+                        key={k}
+                        label={k}
+                        value={
+                          form[k]
+                        }
+                        onChange={(
+                          v: string
+                        ) =>
+                          set(
+                            k,
+                            v
+                          )
+                        }
+                      />
+                    ))}
+
+                    <label className="block mb-4">
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                        How should we send your
+                        verification code?
+                      </span>
+
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            set(
+                              "otpChannel",
+                              "email"
+                            )
+                          }
+                          className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold border ${
+                            form.otpChannel ===
+                            "email"
+                              ? "bg-blue-800 text-white border-blue-800"
+                              : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300"
+                          }`}
+                        >
+                          Email (free)
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            set(
+                              "otpChannel",
+                              "sms"
+                            )
+                          }
+                          className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold border ${
+                            form.otpChannel ===
+                            "sms"
+                              ? "bg-blue-800 text-white border-blue-800"
+                              : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300"
+                          }`}
+                        >
+                          SMS to my phone
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        Email is the default and
+                        doesn't cost anything to send.
+                      </p>
+                    </label>
+
+                    <PasswordInput
+                      label="Password"
+                      value={
+                        form.password
                       }
                       onChange={(
                         v: string
                       ) =>
                         set(
-                          k,
+                          "password",
                           v
                         )
                       }
                     />
-                  ))}
 
-                  <label className="block mb-4">
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                      How should we send your
-                      verification code?
-                    </span>
+                    <PasswordInput
+                      label="Confirm password"
+                      value={
+                        confirmPassword
+                      }
+                      onChange={
+                        setConfirmPassword
+                      }
+                    />
 
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          set(
-                            "otpChannel",
-                            "email"
-                          )
-                        }
-                        className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold border ${
-                          form.otpChannel ===
-                          "email"
-                            ? "bg-blue-800 text-white border-blue-800"
-                            : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300"
-                        }`}
-                      >
-                        Email (free)
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          set(
-                            "otpChannel",
-                            "sms"
-                          )
-                        }
-                        className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold border ${
-                          form.otpChannel ===
-                          "sms"
-                            ? "bg-blue-800 text-white border-blue-800"
-                            : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300"
-                        }`}
-                      >
-                        SMS to my phone
-                      </button>
-                    </div>
-
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                      Email is the default and
-                      doesn't cost anything to send.
+                    <p className="text-xs text-slate-500 dark:text-slate-400 -mt-2 mb-3">
+                      {
+                        PASSWORD_TIP
+                      }
                     </p>
-                  </label>
 
-                  <PasswordInput
-                    label="Password"
-                    value={
-                      form.password
-                    }
-                    onChange={(
-                      v: string
-                    ) =>
-                      set(
-                        "password",
-                        v
-                      )
-                    }
-                  />
-
-                  <PasswordInput
-                    label="Confirm password"
-                    value={
-                      confirmPassword
-                    }
-                    onChange={
-                      setConfirmPassword
-                    }
-                  />
-
-                  <p className="text-xs text-slate-500 dark:text-slate-400 -mt-2 mb-3">
-                    {
-                      PASSWORD_TIP
-                    }
-                  </p>
-
-                  <Input
-                    label="Residential address"
-                    value={
-                      form.residentialAddress
-                    }
-                    onChange={(
-                      v: string
-                    ) =>
-                      set(
-                        "residentialAddress",
-                        v
-                      )
-                    }
-                  />
-
-                  <button
-                    type="button"
-                    onClick={
-                      goPersonalContinue
-                    }
-                    className="btn"
-                  >
-                    Continue
-                  </button>
-
-                  <p className="text-center text-sm text-slate-500 dark:text-slate-300 mt-4">
-                    Already registered?{" "}
-                    <button
-                      type="button"
-                      className="text-blue-700 dark:text-blue-300 font-semibold underline"
-                      onClick={() =>
-                        setMode(
-                          "login"
-                        )
+                    <Input
+                      label="Residential address"
+                      value={
+                        form.residentialAddress
                       }
-                    >
-                      Log in instead
-                    </button>
-                  </p>
-                </Panel>
-              )}
-
-              {step === 1 && (
-                <Panel title="Bank details">
-                  <Input
-                    label="Bank name"
-                    value={
-                      form.bank
-                        .bankName
-                    }
-                    onChange={(
-                      v: string
-                    ) =>
-                      setBank(
-                        "bankName",
-                        v
-                      )
-                    }
-                  />
-
-                  <Input
-                    label="Account number"
-                    value={
-                      form.bank
-                        .accountNumber
-                    }
-                    onChange={(
-                      v: string
-                    ) =>
-                      setBank(
-                        "accountNumber",
-                        v
-                      )
-                    }
-                  />
-
-                  <Input
-                    label="Account name"
-                    value={
-                      form.bank
-                        .accountName
-                    }
-                    onChange={(
-                      v: string
-                    ) =>
-                      setBank(
-                        "accountName",
-                        v
-                      )
-                    }
-                  />
-
-                  <StepNav
-                    onBack={() =>
-                      setStep(0)
-                    }
-                  >
-                    <button
-                      type="button"
-                      onClick={
-                        start
-                      }
-                      className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition"
-                    >
-                      Register &amp; Send OTP
-                    </button>
-                  </StepNav>
-                </Panel>
-              )}
-
-              {step === 2 && (
-                <Panel
-                  title={
-                    form.otpChannel ===
-                    "sms"
-                      ? "Verify your phone number"
-                      : "Verify your email"
-                  }
-                >
-                  <p className="text-slate-600 dark:text-slate-300">
-                    We sent a 6-digit verification
-                    code to{" "}
-                    {form.otpChannel ===
-                    "sms" ? (
-                      <b>
-                        {
-                          form.primaryPhone
-                        }
-                      </b>
-                    ) : (
-                      <b>
-                        {
-                          form.email
-                        }
-                      </b>
-                    )}
-                    .
-                  </p>
-
-                  <Input
-                    label="OTP"
-                    value={
-                      otp
-                    }
-                    onChange={
-                      setOtp
-                    }
-                  />
-
-                  <StepNav
-                    onBack={() =>
-                      setStep(1)
-                    }
-                  >
-                    <button
-                      type="button"
-                      onClick={
-                        verify
-                      }
-                      className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition"
-                    >
-                      Verify OTP
-                    </button>
-                  </StepNav>
-
-                  <button
-                    type="button"
-                    className="mt-3 w-full py-3 border dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    onClick={async () => {
-                      try {
-                        setMsg(
-                          (
-                            await api(
-                              "/api/auth/resend-otp",
-                              {
-                                method:
-                                  "POST",
-
-                                body:
-                                  JSON.stringify({
-                                    userId
-                                  })
-                              }
-                            )
-                          ).message
-                        );
-                      } catch (
-                        e: any
-                      ) {
-                        setError(
-                          e.message
-                        );
-                      }
-                    }}
-                  >
-                    Resend OTP
-                  </button>
-
-                  <p className="text-xs text-slate-400 dark:text-slate-400 mt-3 text-center">
-                    Didn't get your OTP? Contact
-                    an admin directly.
-                  </p>
-                </Panel>
-              )}
-
-              {step === 3 && (
-                <Panel title="Digital guarantor nomination">
-                  <Input
-                    label="Guarantor full name"
-                    value={
-                      guarantor.name
-                    }
-                    onChange={(
-                      v: string
-                    ) =>
-                      setGuarantor({
-                        ...guarantor,
-                        name: v
-                      })
-                    }
-                  />
-
-                  <Input
-                    label="Guarantor phone"
-                    value={
-                      guarantor.phone
-                    }
-                    onChange={(
-                      v: string
-                    ) =>
-                      setGuarantor({
-                        ...guarantor,
-                        phone: v
-                      })
-                    }
-                  />
-
-                  <StepNav
-                    onBack={() =>
-                      setStep(2)
-                    }
-                  >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setStep(
-                          4
-                        )
-                      }
-                      className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition"
-                    >
-                      Continue to Rules
-                    </button>
-                  </StepNav>
-                </Panel>
-              )}
-
-              {step === 4 && (
-                <Panel title="Rules Lock Area">
-                  <div
-                    onScroll={e => {
-                      const x =
-                        e.currentTarget;
-
-                      setRulesEnd(
-                        x.scrollTop +
-                          x.clientHeight >=
-                        x.scrollHeight -
-                          4
-                      );
-                    }}
-                    className="h-72 overflow-y-auto border-2 dark:border-slate-700 rounded p-4 whitespace-pre-line text-sm"
-                  >
-                    {
-                      rules
-                    }
-                  </div>
-
-                  <label
-                    className={`flex gap-2 mt-4 ${
-                      rulesEnd
-                        ? ""
-                        : "opacity-50"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      disabled={
-                        !rulesEnd
-                      }
-                      checked={
-                        accepted
-                      }
-                      onChange={e =>
-                        setAccepted(
-                          e.target
-                            .checked
+                      onChange={(
+                        v: string
+                      ) =>
+                        set(
+                          "residentialAddress",
+                          v
                         )
                       }
                     />
 
-                    I have read and agree to the
-                    Unique Youth rules.
-                  </label>
-
-                  <StepNav
-                    onBack={() =>
-                      setStep(3)
-                    }
-                  >
                     <button
                       type="button"
-                      disabled={
-                        !rulesEnd ||
-                        !accepted
-                      }
                       onClick={
-                        finish
+                        goPersonalContinue
                       }
-                      className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="btn"
                     >
-                      Register &amp; Join Circle
+                      Continue
                     </button>
-                  </StepNav>
-                </Panel>
-              )}
-            </>
-          )}
-        </main>
 
-        <AppFooter />
+                    <p className="text-center text-sm text-slate-500 dark:text-slate-300 mt-4">
+                      Already registered?{" "}
+                      <button
+                        type="button"
+                        className="text-blue-700 dark:text-blue-300 font-semibold underline"
+                        onClick={() => {
+                          setMode(
+                            "login"
+                          );
+                          window.scrollTo(0, 0);
+                        }}
+                      >
+                        Log in instead
+                      </button>
+                    </p>
+                  </Panel>
+                )}
+
+                {step === 1 && (
+                  <Panel title="Bank details">
+                    <Input
+                      label="Bank name"
+                      value={
+                        form.bank
+                          .bankName
+                      }
+                      onChange={(
+                        v: string
+                      ) =>
+                        setBank(
+                          "bankName",
+                          v
+                        )
+                      }
+                    />
+
+                    <Input
+                      label="Account number"
+                      value={
+                        form.bank
+                          .accountNumber
+                      }
+                      onChange={(
+                        v: string
+                      ) =>
+                        setBank(
+                          "accountNumber",
+                          v
+                        )
+                      }
+                    />
+
+                    <Input
+                      label="Account name"
+                      value={
+                        form.bank
+                          .accountName
+                      }
+                      onChange={(
+                        v: string
+                      ) =>
+                        setBank(
+                          "accountName",
+                          v
+                        )
+                      }
+                    />
+
+                    <StepNav
+                      onBack={() =>
+                        setStep(0)
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={
+                          start
+                        }
+                        className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition"
+                      >
+                        Register &amp; Send OTP
+                      </button>
+                    </StepNav>
+                  </Panel>
+                )}
+
+                {step === 2 && (
+                  <Panel
+                    title={
+                      form.otpChannel ===
+                      "sms"
+                        ? "Verify your phone number"
+                        : "Verify your email"
+                    }
+                  >
+                    <p className="text-slate-600 dark:text-slate-300">
+                      We sent a 6-digit verification
+                      code to{" "}
+                      {form.otpChannel ===
+                      "sms" ? (
+                        <b>
+                          {
+                            form.primaryPhone
+                          }
+                        </b>
+                      ) : (
+                        <b>
+                          {
+                            form.email
+                          }
+                        </b>
+                      )}
+                      .
+                    </p>
+
+                    <Input
+                      label="OTP"
+                      value={
+                        otp
+                      }
+                      onChange={
+                        setOtp
+                      }
+                    />
+
+                    <StepNav
+                      onBack={() =>
+                        setStep(1)
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={
+                          verify
+                        }
+                        className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition"
+                      >
+                        Verify OTP
+                      </button>
+                    </StepNav>
+
+                    <button
+                      type="button"
+                      className="mt-3 w-full py-3 border dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      onClick={async () => {
+                        try {
+                          setMsg(
+                            (
+                              await api(
+                                "/api/auth/resend-otp",
+                                {
+                                  method:
+                                    "POST",
+
+                                  body:
+                                    JSON.stringify({
+                                      userId
+                                    })
+                                }
+                              )
+                            ).message
+                          );
+                        } catch (
+                          e: any
+                        ) {
+                          setError(
+                            e.message
+                          );
+                        }
+                      }}
+                    >
+                      Resend OTP
+                    </button>
+
+                    <p className="text-xs text-slate-400 dark:text-slate-400 mt-3 text-center">
+                      Didn't get your OTP? Contact
+                      an admin directly.
+                    </p>
+                  </Panel>
+                )}
+
+                {step === 3 && (
+                  <Panel title="Digital guarantor nomination">
+                    <Input
+                      label="Guarantor full name"
+                      value={
+                        guarantor.name
+                      }
+                      onChange={(
+                        v: string
+                      ) =>
+                        setGuarantor({
+                          ...guarantor,
+                          name: v
+                        })
+                      }
+                    />
+
+                    <Input
+                      label="Guarantor phone"
+                      value={
+                        guarantor.phone
+                      }
+                      onChange={(
+                        v: string
+                      ) =>
+                        setGuarantor({
+                          ...guarantor,
+                          phone: v
+                        })
+                      }
+                    />
+
+                    <StepNav
+                      onBack={() =>
+                        setStep(2)
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setStep(
+                            4
+                          )
+                        }
+                        className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition"
+                      >
+                        Continue to Rules
+                      </button>
+                    </StepNav>
+                  </Panel>
+                )}
+
+                {step === 4 && (
+                  <Panel title="Rules Lock Area">
+                    <div
+                      onScroll={e => {
+                        const x =
+                          e.currentTarget;
+
+                        setRulesEnd(
+                          x.scrollTop +
+                            x.clientHeight >=
+                          x.scrollHeight -
+                            4
+                        );
+                      }}
+                      className="h-72 overflow-y-auto border-2 dark:border-slate-700 rounded p-4 whitespace-pre-line text-sm"
+                    >
+                      {
+                        rules
+                      }
+                    </div>
+
+                    <label
+                      className={`flex gap-2 mt-4 ${
+                        rulesEnd
+                          ? ""
+                          : "opacity-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        disabled={
+                          !rulesEnd
+                        }
+                        checked={
+                          accepted
+                        }
+                        onChange={e =>
+                          setAccepted(
+                            e.target
+                              .checked
+                          )
+                        }
+                      />
+
+                      I have read and agree to the
+                      Unique Youth rules.
+                    </label>
+
+                    <StepNav
+                      onBack={() =>
+                        setStep(3)
+                      }
+                    >
+                      <button
+                        type="button"
+                        disabled={
+                          !rulesEnd ||
+                          !accepted
+                        }
+                        onClick={
+                          finish
+                        }
+                        className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        Register &amp; Join Circle
+                      </button>
+                    </StepNav>
+                  </Panel>
+                )}
+              </>
+            )}
+          </main>
+
+          <AppFooter />
+        </div>
+      );
+    }
+
+    // Otherwise, show the new Landing Page with scroll‑capturing callbacks
+    return (
+      <div className="min-h-screen bg-white dark:bg-slate-950">
+        <LandingPage
+          onNavigateLogin={() => {
+            setLandingScrollPos(window.scrollY);
+            setMode('login');
+            window.scrollTo(0, 0);
+          }}
+          onNavigateRegister={() => {
+            setLandingScrollPos(window.scrollY);
+            setMode('register');
+            window.scrollTo(0, 0);
+          }}
+          onGetStarted={() => {
+            setLandingScrollPos(window.scrollY);
+            setMode('register');
+            window.scrollTo(0, 0);
+          }}
+          theme={theme}
+          setTheme={setTheme}
+        />
       </div>
     );
   }
@@ -4023,6 +4266,10 @@ export default function App() {
       disableBiometricLogin={
         disableBiometricLogin
       }
+      reportMonthlyPayment={
+        reportMonthlyPayment
+      }
+      isPaymentReportingOpen={isPaymentReportingOpen}
     />
   );
 }
@@ -4048,7 +4295,9 @@ function Dashboard({
   biometricBusy,
   biometricEnabled,
   enableBiometricLogin,
-  disableBiometricLogin
+  disableBiometricLogin,
+  reportMonthlyPayment,
+  isPaymentReportingOpen = true
 }: any) {
   const [
     view,
@@ -4114,6 +4363,54 @@ function Dashboard({
 
   const currentMonthFinance =
     dashboard?.currentMonthFinance;
+
+  const currentMonthPayment =
+    dashboard?.currentMonthPayment;
+
+  const currentMonthPaymentStatus =
+    currentMonthPayment?.status ||
+    "unreported";
+
+  // NEW: state to control visibility of the payment confirmation
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(true);
+
+  // Helper to get the dismissal key for the current month
+  const getDismissalKey = () => {
+    const month = currentMonthPayment?.month || "";
+    return `uy_payment_confirmation_dismissed_${month}`;
+  };
+
+  // NEW: auto‑clear after 2 minutes, but also respect localStorage dismissal
+  useEffect(() => {
+    if (currentMonthPaymentStatus === "paid") {
+      const month = currentMonthPayment?.month || "";
+      const dismissedKey = getDismissalKey();
+      const isDismissed = localStorage.getItem(dismissedKey) === "true";
+
+      if (isDismissed) {
+        setShowPaymentConfirmation(false);
+        return;
+      }
+
+      setShowPaymentConfirmation(true);
+
+      // Auto‑clear after 2 minutes (120,000ms)
+      const timer = setTimeout(() => {
+        setShowPaymentConfirmation(false);
+      }, 120000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowPaymentConfirmation(false);
+    }
+  }, [currentMonthPaymentStatus, currentMonthPayment?.month]);
+
+  // Manual dismiss handler
+  const dismissConfirmation = () => {
+    const dismissedKey = getDismissalKey();
+    localStorage.setItem(dismissedKey, "true");
+    setShowPaymentConfirmation(false);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
@@ -4336,7 +4633,83 @@ function Dashboard({
               </div>
             )}
 
-          {isActive && (
+                    <div className="mt-5">
+          <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow">
+            <h2 className="font-bold text-xl text-slate-900 dark:text-white">
+              My payment history
+            </h2>
+
+            <p className="text-slate-600 dark:text-slate-300">
+              Confirmed months:{" "}
+              {paid}
+            </p>
+
+            <div className="mt-4 bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 rounded-lg p-4 text-sm text-slate-700 dark:text-slate-200">
+              <p>
+                Send your ₦11,000 to the
+                admin's account and share your
+                receipt/proof in the WhatsApp
+                community.
+              </p>
+
+              {currentMonthPaymentStatus === "paid" && (
+                <div className="mt-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 p-3 text-center">
+                  <p className="font-bold text-green-700 dark:text-green-300">
+                    ✓ {currentMonthPayment?.month} payment confirmed
+                  </p>
+                  <p className="text-xs text-green-700/80 dark:text-green-300/80 mt-1">
+                    An administrator has acknowledged this payment.
+                  </p>
+                </div>
+              )}
+
+              {currentMonthPaymentStatus === "reported" && (
+                <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-3">
+                  <p className="font-bold text-amber-700 dark:text-amber-300">
+                    Payment reported — awaiting confirmation
+                  </p>
+                  <p className="text-xs text-amber-700/80 dark:text-amber-300/80 mt-1">
+                    The admin still needs to verify your {currentMonthPayment?.month} payment.
+                  </p>
+                </div>
+              )}
+
+              {currentMonthPaymentStatus === "rejected" && (
+                <div className="mt-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 p-3">
+                  <p className="font-bold text-red-700 dark:text-red-300">
+                    Payment report needs attention
+                  </p>
+                  <p className="text-xs text-red-700/80 dark:text-red-300/80 mt-1">
+                    {currentMonthPayment?.rejectionReason ||
+                      "The admin could not confirm the payment report. Check your proof and report it again."}
+                  </p>
+                </div>
+              )}
+
+              {currentMonthPaymentStatus === "unreported" && (
+                <>
+                  <button
+                    type="button"
+                    onClick={reportMonthlyPayment}
+                    disabled={!isPaymentReportingOpen}
+                    className="mt-3 w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isPaymentReportingOpen
+                      ? "I've paid for this month"
+                      : "Payment reporting is currently closed"}
+                  </button>
+                  {!isPaymentReportingOpen && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                      Payments can only be reported when the admin opens the window.
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </section>
+          </div>
+
+{isActive && (
             <>
               <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-5">
                 <Card
@@ -4566,26 +4939,6 @@ function Dashboard({
                 </div>
               )}
 
-              <div className="grid md:grid-cols-2 gap-5 mt-5">
-                <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow">
-                  <h2 className="font-bold text-xl text-slate-900 dark:text-white">
-                    My payment history
-                  </h2>
-
-                  <p className="text-slate-600 dark:text-slate-300">
-                    Confirmed months:{" "}
-                    {paid}
-                  </p>
-
-                  <div className="mt-4 bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 rounded-lg p-4 text-sm text-slate-700 dark:text-slate-200">
-                    Send your ₦11,000 to the
-                    admin's account and share your
-                    receipt in the WhatsApp community.
-                    An admin will confirm it here once
-                    received.
-                  </div>
-                </section>
-
                 <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow">
                   <h2 className="font-bold text-xl text-slate-900 dark:text-white">
                     Your circle
@@ -4656,8 +5009,8 @@ function Dashboard({
                     </p>
                   )}
                 </section>
-              </div>
             </>
+
           )}
         </main>
       )}
@@ -4795,23 +5148,7 @@ function resizeImageFile(
 }
 
 /* ============================================================
- * PROFILE PAGE
- *
- * Phase 1:
- * - Profile entry point/header avatar
- *
- * Phase 2:
- * - View avatar
- * - Change avatar
- * - Delete avatar
- * - Change password
- * - Fingerprint/WebAuthn controls
- *
- * Phase 3:
- * - Three-dot menu
- * - FAQ
- * - Send feedback
- * - Contact support
+ * PROFILE PAGE – FULLY CORRECTED AND RESPONSIVE
  * ============================================================ */
 
 function ProfilePage({
@@ -4875,6 +5212,9 @@ function ProfilePage({
     showSupport,
     setShowSupport
   ] = useState(false);
+
+  // NEW: RULES MODAL STATE
+  const [showRules, setShowRules] = useState(false);
 
   const [
     feedbackText,
@@ -5419,8 +5759,8 @@ function ProfilePage({
       {/* ====================================================
           PROFILE HEADER
           ==================================================== */}
-      <div className="flex items-center justify-between gap-3 mb-5">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             type="button"
             onClick={() =>
@@ -5458,7 +5798,7 @@ function ProfilePage({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-2 sm:mt-0 w-full sm:w-auto justify-end sm:justify-start">
           <button
             type="button"
             onClick={
@@ -5488,19 +5828,27 @@ function ProfilePage({
             <div className="absolute right-0 top-12 z-30 w-56 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl overflow-hidden">
               <button
                 type="button"
-                onClick={
-                  openFaq
-                }
+                onClick={openFaq}
                 className="w-full text-left px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 ❓ FAQ
               </button>
 
+              {/* NEW: RULES & REGULATIONS BUTTON IN PROFILE MENU */}
               <button
                 type="button"
-                onClick={
-                  openFeedback
-                }
+                onClick={() => {
+                  setShowMoreMenu(false);
+                  setShowRules(true);
+                }}
+                className="w-full text-left px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
+              >
+                📜 Rules & Regulations
+              </button>
+
+              <button
+                type="button"
+                onClick={openFeedback}
                 className="w-full text-left px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 💬 Send Feedback
@@ -5508,9 +5856,7 @@ function ProfilePage({
 
               <button
                 type="button"
-                onClick={
-                  openSupport
-                }
+                onClick={openSupport}
                 className="w-full text-left px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 🛟 Contact Support
@@ -5521,7 +5867,7 @@ function ProfilePage({
         </div>
       </div>
 
-      <div className="mb-5">
+      <div className="mb-5 w-full flex justify-start sm:justify-start">
         <button
           type="button"
           onClick={() =>
@@ -5546,10 +5892,10 @@ function ProfilePage({
       )}
 
       {/* ====================================================
-          PROFILE PHOTO
+          PROFILE PHOTO - FULLY CORRECTED AND RESPONSIVE
           ==================================================== */}
       <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+        <div className="flex flex-col items-center sm:flex-row sm:items-start gap-5">
           <div className="flex flex-col items-center gap-3 shrink-0">
             <button
               type="button"
@@ -5576,25 +5922,24 @@ function ProfilePage({
                 )[0]
               )}
             </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                setShowAvatarViewer(
-                  true
-                )
-              }
-              className="px-4 py-2 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-            >
-              View photo
-            </button>
           </div>
 
-          <div className="flex-1 w-full">
-            <div className="flex flex-wrap gap-2">
+          <div className="flex-1 w-full flex flex-col items-center sm:items-start">
+            <div className="flex flex-row flex-wrap items-center justify-center sm:justify-start gap-2 w-full">
+              <button
+                type="button"
+                onClick={() =>
+                  setShowAvatarViewer(
+                    true
+                  )
+                }
+                className="px-4 py-2 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+              >
+                View photo
+              </button>
+
               <label className="inline-flex items-center bg-white dark:bg-slate-800 border border-blue-700 text-blue-700 dark:text-blue-300 rounded-lg px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-700">
                 Change photo
-
                 <input
                   type="file"
                   accept="image/*"
@@ -5618,13 +5963,13 @@ function ProfilePage({
               )}
             </div>
 
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center sm:text-left">
               Tap the photo or use View photo to open a larger preview.
               JPG or PNG files are resized automatically.
             </p>
 
             {avatarChanged && (
-              <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 font-semibold">
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 font-semibold text-center sm:text-left">
                 Photo changes are not saved until you press "Save profile".
               </p>
             )}
@@ -5675,7 +6020,7 @@ function ProfilePage({
           CHANGE PASSWORD
           ==================================================== */}
       <section className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow mt-5">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <h2 className="font-bold text-lg text-slate-900 dark:text-white">
               Change password
@@ -5696,7 +6041,7 @@ function ProfilePage({
               setPasswordErr("");
               setPasswordMsg("");
             }}
-            className="shrink-0 bg-blue-800 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-900"
+            className="w-full sm:w-auto shrink-0 bg-blue-800 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-900 text-center"
           >
             {passwordOpen
               ? "Close"
@@ -5801,7 +6146,7 @@ function ProfilePage({
           Security
         </h2>
 
-        <div className="mt-4 flex items-center justify-between gap-4">
+        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="font-semibold text-slate-900 dark:text-white">
               {isNativeAndroid
@@ -5914,8 +6259,8 @@ function ProfilePage({
           Day and month only — no year needed.
         </p>
 
-        <div className="flex gap-3 flex-wrap">
-          <label className="block">
+        <div className="flex flex-col sm:flex-row gap-3 flex-wrap w-full">
+          <label className="block w-full sm:w-auto">
             <span className="text-sm font-semibold">
               Day
             </span>
@@ -5932,11 +6277,11 @@ function ProfilePage({
                   e.target.value
                 )
               }
-              className="mt-1 w-24 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg p-3"
+              className="mt-1 w-full sm:w-24 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg p-3"
             />
           </label>
 
-          <label className="block">
+          <label className="block w-full sm:w-auto">
             <span className="text-sm font-semibold">
               Month
             </span>
@@ -5950,7 +6295,7 @@ function ProfilePage({
                   e.target.value
                 )
               }
-              className="mt-1 border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg p-3"
+              className="mt-1 w-full sm:w-auto border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg p-3"
             >
               <option value="">
                 Select
@@ -6274,6 +6619,13 @@ function ProfilePage({
             </div>
           </div>
         </div>
+      )}
+
+      {/* RULES MODAL RENDER — now using the top‑level component (stable identity) */}
+      {showRules && (
+        <RulesModal
+          onClose={() => setShowRules(false)}
+        />
       )}
     </main>
   );
