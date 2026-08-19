@@ -1845,10 +1845,11 @@ export default function AjoRecipientDraw({
                   <p className="text-lg font-black text-red-600 dark:text-red-400 mt-1">
                     {formatNaira(
                       500 *
-                        Math.ceil(
-                          active.baselineSize /
-                            2
-                        )
+                        Math.max(
+                          3,
+                          Math.ceil(active.baselineSize / 2)
+                        ) *
+                        2
                     )}
                   </p>
                 </div>
