@@ -69,6 +69,11 @@ jobs:
       - uses: android-actions/setup-android@v3
 
       - name: Install dependencies
+        working-directory: ./unique-youths-client
+        run: npm ci
+
+      - name: Install dependencies
+        working-directory: ./unique-youths-client
         run: npm install
 
       - name: Build web app

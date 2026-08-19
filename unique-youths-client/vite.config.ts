@@ -9,13 +9,27 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Split vendor libraries into separate chunks
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "capacitor": ["@capacitor/core", "@capacitor/status-bar", "@capgo/capacitor-native-biometric"],
-          // Split pages/components
-          "page-dashboard": ["./src/pages/Dashboard.tsx"],
-          "page-landing": ["./src/components/LandingPage.tsx"],
+        manualChunks(id) {
+          // Split vendor libraries
+          if (id.includes("node_modules")) {
+            if (
+              id.includes("react") ||
+              id.includes("react-dom") ||
+              id.includes("react-router-dom")
+            ) {
+              return "react-vendor";
+            }
+            if (id.includes("@capacitor")) {
+              return "capacitor";
+            }
+          },
+          // Split specific pages/components safely using path matching
+          if (id.includes("src/pages/Dashboard")) {
+            return "page-dashboard";
+          }
+          if (id.includes("src/components/LandingPage")) {
+            return "page-landing";
+          }
         },
       },
     },

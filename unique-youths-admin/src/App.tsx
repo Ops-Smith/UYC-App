@@ -50,7 +50,7 @@ const TABS = [
 type TabId = (typeof TABS)[number]["id"];
 
 const TOKEN_KEY = "adminToken";
-const APP_VERSION = "1.3.0";
+const APP_VERSION = "1.4.0";
 
 function useTheme() {
   const [theme, setTheme] = useState<Theme>((localStorage.getItem("uy_admin_theme") as Theme) || "system");
