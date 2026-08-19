@@ -38,13 +38,8 @@ jobs:
 
       - uses: android-actions/setup-android@v4
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install Capacitor and assets generator
-        run: |
-          npm install @capacitor/core @capacitor/android
-          npm install --save-dev @capacitor/cli @capacitor/assets
+      - name: Install dependencies (exact from lockfile)
+        run: npm ci
 
       - name: Build web app
         run: npm run build
@@ -78,27 +73,12 @@ jobs:
             echo "Android platform already exists, skipping add."
           fi
 
-      # ✅ FIX: Change Java compatibility to 17
-      - name: Fix Java compatibility to Java 17
-        working-directory: unique-youths-admin/android
-        run: |
-          echo "=== Original build.gradle ==="
-          cat app/build.gradle | grep -E "sourceCompatibility|targetCompatibility|compileOptions" || echo "No compatibility settings found"
-          
-          # Replace Java 21 with Java 17
-          sed -i 's/sourceCompatibility = JavaVersion.VERSION_21/sourceCompatibility = JavaVersion.VERSION_17/g' app/build.gradle
-          sed -i 's/targetCompatibility = JavaVersion.VERSION_21/targetCompatibility = JavaVersion.VERSION_17/g' app/build.gradle
-          sed -i 's/JavaVersion.VERSION_21/JavaVersion.VERSION_17/g' app/build.gradle
-          
-          echo "=== Patched build.gradle ==="
-          cat app/build.gradle | grep -E "sourceCompatibility|targetCompatibility|compileOptions" || echo "No compatibility settings found"
-
       - name: Copy icon for asset generation
         run: |
           mkdir -p assets
           cp public/assets/icon.png assets/icon.png
 
-      - name: Generate Android assets (icons & splash)
+      - name: Generate Android assets
         run: npx capacitor-assets generate
 
       - name: Sync Capacitor Android project
@@ -133,7 +113,7 @@ jobs:
         if: steps.signing.outputs.has_keystore == 'false'
         working-directory: unique-youths-admin/android
         run: |
-          echo "::warning::No ADMIN_ANDROID_KEYSTORE_BASE64 secret set - building a debug-signed APK instead of a release-signed one. See the comment at the top of this workflow file for how to add proper signing."
+          echo "::warning::No signing secrets set – building debug-signed APK."
           ./gradlew assembleDebug
           mkdir -p ../apk-output
           cp app/build/outputs/apk/debug/app-debug.apk ../apk-output/unique-youths-admin.apk
@@ -159,7 +139,7 @@ jobs:
         with:
           tag_name: latest-admin-android
           name: Latest Admin Android build
-          body: Automatically built from the latest master branch. Downloaded via the admin app download link.
+          body: Automatically built from the latest master branch.
           prerelease: false
           files: unique-youths-admin/apk-output/unique-youths-admin.apk
         env:
