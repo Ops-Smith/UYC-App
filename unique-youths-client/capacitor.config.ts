@@ -14,7 +14,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // (see .github/workflows/build-android.yml) so this can point at whichever
 // URL the client is actually deployed to (e.g. your Render static site),
 // without hardcoding it here. Falls back to a placeholder for local builds.
-const LIVE_URL = process.env.CLIENT_APP_URL || "https://uyc-app-client.onrender.com/";
+const LIVE_URL = (import.meta as any).env?.CLIENT_APP_URL || "https://uyc-app-client.onrender.com/";
 
 const config: CapacitorConfig = {
   appId: "com.uniqueyouths.thrift",
