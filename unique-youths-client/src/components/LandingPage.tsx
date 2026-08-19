@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export interface LandingPageProps {
   onNavigateLogin: () => void;
@@ -50,6 +50,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [showSecurity, setShowSecurity] = useState(false);
   const [showServiceCharge, setShowServiceCharge] = useState(false);
 
+  // ============================================================
+  // SCROLL DIRECTION FOR HEADER HIDE/SHOW
+  // ============================================================
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const current = window.scrollY;
+      if (current > lastScrollY.current && current > 50) {
+        setIsHeaderVisible(false);
+      } else if (current < lastScrollY.current) {
+        setIsHeaderVisible(true);
+      }
+      lastScrollY.current = current;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
@@ -81,8 +101,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col font-sans">
-      {/* Header - Responsive */}
-      <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky top-0 z-50 shadow-sm">
+      {/* Header - Responsive + scroll hide */}
+      <header
+        className={`w-full max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky top-0 z-50 shadow-sm transition-transform duration-300 ${
+          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-center sm:justify-start">
           <img
             src="/brand/logo-badge.png"

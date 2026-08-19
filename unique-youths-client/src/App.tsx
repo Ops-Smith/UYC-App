@@ -4,6 +4,9 @@ import {
   useState,
   type ChangeEvent
 } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { BackButton } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 
 import {
   startAuthentication,
@@ -12,16 +15,48 @@ import {
   platformAuthenticatorIsAvailable
 } from "@simplewebauthn/browser";
 
-import { Capacitor } from "@capacitor/core";
-
 import {
   NativeBiometric,
-  AccessControl,
   BiometryType
 } from "@capgo/capacitor-native-biometric";
 
 import { api } from "./lib/api";
 import { LandingPage } from "./components/LandingPage";
+
+// ============================================================
+// BIOMETRIC HELPERS
+// ============================================================
+import {
+  saveNativeBiometricCredentials,
+  hasNativeBiometricCredentials,
+  disableNativeBiometricCredentials,
+  loginWithNativeBiometric,
+  BIOMETRIC_SERVER
+} from "./lib/nativeBiometric";
+
+// ============================================================
+// SCROLL DIRECTION HOOK
+// ============================================================
+function useScrollDirection() {
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const current = window.scrollY;
+      if (current > lastScrollY.current && current > 50) {
+        setIsVisible(false);
+      } else if (current < lastScrollY.current) {
+        setIsVisible(true);
+      }
+      lastScrollY.current = current;
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return isVisible;
+}
 
 /* ============================================================
  * APP CONTENT
@@ -55,7 +90,7 @@ const rules = `1. Monthly contribution is ₦11,000: ₦10,000 goes into the sha
 7. Payment happens off-platform: send your contribution to the admin and share proof in the community. An admin confirms it here once received.
 8. Each month, the savings pot is formed from the ₦10,000 savings portion actually paid by members for that month. One or two eligible members may be selected at random, according to the circle's configured recipient count.
 9. The gross payout per selected recipient is the month's actual savings pot divided by the number of selected recipients.
-10. A separate maintenance fee is charged to each selected recipient. The maintenance fee scales with circle size as: ₦500 × max(3, ceil(circle size ÷ 2)) × 2.
+10. A separate maintenance fee is charged to each selected recipient. The fee scales with your circle size. For example: 4 members = ₦1,500 per winner, 6 members = ₦1,800, 8 members = ₦3,100, 10 members = ₦3,400, 12 members = ₦3,700, 14 members = ₦4,000, and 16–20 members = a fixed ₦5,000. The actual fee is calculated as ₦500 × ceil(circle size ÷ 2).
 11. The recipient's net payout is the gross payout minus the maintenance fee. The ₦1,000 party-fund contribution remains separate from the savings pot and recipient payout.
 12. Members must continue their monthly contribution obligations even after receiving a lump-sum payout.
 13. Members must not attempt to manipulate recipient selection or circle records.
@@ -1551,6 +1586,9 @@ function RulesModal({ onClose }: { onClose: () => void }) {
  * ============================================================ */
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [
     slide,
     setSlide
@@ -1733,6 +1771,13 @@ export default function App() {
       return false;
     }
   });
+
+  // ============================================================
+  // NEW: STATE FOR FINGERPRINT PASSWORD MODAL
+  // ============================================================
+  const [showFingerprintPasswordModal, setShowFingerprintPasswordModal] = useState(false);
+  const [fingerprintPassword, setFingerprintPassword] = useState("");
+  const [fingerprintPasswordError, setFingerprintPasswordError] = useState("");
 
   // ============================================================
   // FIXED: ADDED MISSING STATE FOR REAL-TIME POLLING
@@ -2143,403 +2188,162 @@ export default function App() {
    * ANDROID NATIVE FINGERPRINT
    * ========================================================== */
 
-  const enableNativeBiometricLogin =
-    async () => {
-      if (!memberToken) {
-        setError(
-          "Please log in with your password before enabling fingerprint login."
-        );
+  // --- REPLACED enableNativeBiometricLogin with modal-based flow ---
+  const startNativeBiometricEnrollment = async () => {
+    if (!memberToken) {
+      setError("Please log in with your password before enabling fingerprint login.");
+      return;
+    }
+    if (!isNativeAndroidApp()) {
+      setError("Native fingerprint login is only available inside the Android app.");
+      return;
+    }
+    let availability;
+    try {
+      availability = await NativeBiometric.isAvailable({ useFallback: false });
+    } catch (e: any) {
+      setError(getNativeBiometricErrorMessage(e, "Android biometric authentication is not available."));
+      return;
+    }
+    if (!availability?.isAvailable) {
+      setError("Fingerprint authentication is not available on this device. Register a fingerprint in Android Settings.");
+      return;
+    }
+    setNativeBiometricAvailable(true);
+    setNativeFingerprintAvailable(true);
 
-        return;
-      }
+    // Show the password modal instead of window.prompt
+    setShowFingerprintPasswordModal(true);
+    setFingerprintPassword("");
+    setFingerprintPasswordError("");
+  };
 
-      if (
-        !isNativeAndroidApp()
-      ) {
-        setError(
-          "Native fingerprint login is only available inside the Android app."
-        );
+  // --- REPLACED submitFingerprintPassword with helper-based flow ---
+  const submitFingerprintPassword = async () => {
+    const password = fingerprintPassword.trim();
+    if (!password) {
+      setFingerprintPasswordError("Please enter your password.");
+      return;
+    }
 
-        return;
-      }
+    setBiometricBusy(true);
+    setError("");
+    setMsg("");
+    setFingerprintPasswordError("");
 
-      let nativeAvailability: any;
-
-      try {
-        nativeAvailability =
-          await NativeBiometric.isAvailable(
-            {
-              useFallback:
-                false
-            }
-          );
-      } catch (
-        e: any
-      ) {
-        setError(
-          getNativeBiometricErrorMessage(
-            e,
-            "Android biometric authentication is not available on this device."
-          )
-        );
-
-        return;
-      }
-
-      if (
-        !nativeAvailability?.isAvailable
-      ) {
-        setError(
-          "Fingerprint authentication is not available on this Android device. Register a fingerprint in Android Settings and try again."
-        );
-
-        return;
-      }
-
-      setNativeBiometricAvailable(
-        true
-      );
-
-      setNativeFingerprintAvailable(
-        true
-      );
-
-      const username =
-        String(
-          dashboard?.user
-            ?.username ||
-            dashboard?.user
-              ?.email ||
-            loginForm
-              .usernameOrEmail ||
-            ""
-        ).trim();
-
+    try {
+      const username = String(
+        dashboard?.user?.username || dashboard?.user?.email || loginForm.usernameOrEmail || ""
+      ).trim();
       if (!username) {
-        setError(
-          "Your username or email could not be determined."
-        );
-
-        return;
+        throw new Error("Your username or email could not be determined.");
       }
 
-      const password =
-        window.prompt(
-          "Enter your current account password to enable fingerprint login on this Android device:"
-        );
+      // Verify password by attempting login
+      await api("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ usernameOrEmail: username, password, deviceId: getDeviceId() })
+      });
 
+      // Store credentials with biometric protection using helper
+      await saveNativeBiometricCredentials(username, password);
+
+      // Confirm credential was saved
+      const saved = await hasNativeBiometricCredentials();
+      if (!saved) {
+        throw new Error("Credential was not saved after fingerprint setup.");
+      }
+
+      localStorage.setItem(NATIVE_BIOMETRIC_ENABLED_KEY, "1");
+      setBiometricEnabled(true);
+      setMsg("Fingerprint login has been enabled on this Android device.");
+      setShowFingerprintPasswordModal(false);
+    } catch (e: any) {
+      let errorMsg = getNativeBiometricErrorMessage(e, "Unable to enable fingerprint login.");
+      if (String(e?.message || "").toLowerCase().includes("cancel")) {
+        errorMsg = "Fingerprint setup was cancelled. Please try again.";
+      }
+      setFingerprintPasswordError(errorMsg);
+      setError(errorMsg);
+    } finally {
+      setBiometricBusy(false);
+    }
+  };
+
+  // --- REPLACED disableNativeBiometricLogin with helper-based flow ---
+  const disableNativeBiometricLogin = async () => {
+    if (!isNativeAndroidApp()) {
+      setError("Native fingerprint login is only available inside the Android app.");
+      return;
+    }
+
+    const confirmed = window.confirm("Disable fingerprint login on this Android device?");
+    if (!confirmed) return;
+
+    setError("");
+    setMsg("");
+    setBiometricBusy(true);
+
+    try {
+      await disableNativeBiometricCredentials();
+      localStorage.removeItem(NATIVE_BIOMETRIC_ENABLED_KEY);
+      setBiometricEnabled(false);
+      setMsg("Fingerprint login has been disabled on this Android device.");
+    } catch (e: any) {
+      setError(getNativeBiometricErrorMessage(e, "Unable to disable fingerprint login."));
+    } finally {
+      setBiometricBusy(false);
+    }
+  };
+
+  // --- REPLACED nativeBiometricLogin with helper-based flow ---
+  const nativeBiometricLogin = async () => {
+    if (!isNativeAndroidApp()) return;
+
+    if (!nativeFingerprintAvailable) {
+      setError("Fingerprint authentication is not available on this Android device.");
+      return;
+    }
+
+    setError("");
+    setMsg("");
+    setBiometricBusy(true);
+
+    try {
+      const credentials = await loginWithNativeBiometric();
+
+      const loginResult = await api("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          usernameOrEmail: credentials.username,
+          password: credentials.password,
+          deviceId: getDeviceId()
+        })
+      });
+
+      sessionStorage.setItem(TOKEN_KEY, loginResult.token);
+      localStorage.setItem(HAS_REGISTERED_KEY, "1");
+      setMemberToken(loginResult.token);
+      setMsg("Fingerprint login successful.");
+    } catch (e: any) {
+      const message = getNativeBiometricErrorMessage(e, "Fingerprint authentication failed.");
+      // If credential not found, clear local flag
       if (
-        !password
+        String(e?.message || e || "")
+          .toLowerCase()
+          .includes("credential") ||
+        String(e?.message || e || "")
+          .toLowerCase()
+          .includes("saved")
       ) {
-        return;
+        localStorage.removeItem(NATIVE_BIOMETRIC_ENABLED_KEY);
+        setBiometricEnabled(false);
       }
-
-      setError("");
-      setMsg("");
-      setBiometricBusy(
-        true
-      );
-
-      try {
-        await api(
-          "/api/auth/login",
-          {
-            method:
-              "POST",
-
-            body:
-              JSON.stringify({
-                usernameOrEmail:
-                  username,
-
-                password,
-
-                deviceId:
-                  getDeviceId()
-              })
-          }
-        );
-
-        /*
-         * setCredentials() is the native provisioning step.
-         * With BIOMETRY_ANY the Android plugin protects the stored
-         * credentials with the device biometric keystore. The native
-         * fingerprint prompt is therefore expected during this call.
-         *
-         * Once it resolves successfully, treat the credential as enabled
-         * and persist that state locally. We intentionally do not call
-         * getSecureCredentials() here because that would trigger a second
-         * fingerprint prompt immediately after successful setup.
-         */
-        await NativeBiometric.setCredentials(
-          {
-            username,
-
-            password,
-
-            server:
-              NATIVE_BIOMETRIC_SERVER,
-
-            accessControl:
-              AccessControl.BIOMETRY_ANY,
-
-            authValidityDuration:
-              0,
-
-            title:
-              "Enable fingerprint login",
-
-            negativeButtonText:
-              "Cancel"
-          }
-        );
-
-        /*
-         * Confirm that the native credential store now contains the
-         * credential before marking the UI as enabled.
-         *
-         * This does not invoke the biometric prompt again; it only checks
-         * whether the credential record exists for our stable server key.
-         */
-        const saved =
-          await NativeBiometric.isCredentialsSaved(
-            {
-              server:
-                NATIVE_BIOMETRIC_SERVER
-            }
-          );
-
-        if (
-          !saved.isSaved
-        ) {
-          throw new Error(
-            "Android completed fingerprint authentication but did not confirm that the biometric login credential was saved."
-          );
-        }
-
-        localStorage.setItem(
-          NATIVE_BIOMETRIC_ENABLED_KEY,
-          "1"
-        );
-
-        setBiometricEnabled(
-          true
-        );
-
-        setMsg(
-          "Fingerprint login has been enabled on this Android device."
-        );
-      } catch (
-        e: any
-      ) {
-        setError(
-          getNativeBiometricErrorMessage(
-            e,
-            "Unable to enable fingerprint login."
-          )
-        );
-      } finally {
-        setBiometricBusy(
-          false
-        );
-      }
-    };
-
-  const disableNativeBiometricLogin =
-    async () => {
-      if (
-        !isNativeAndroidApp()
-      ) {
-        setError(
-          "Native fingerprint login is only available inside the Android app."
-        );
-
-        return;
-      }
-
-      const confirmed =
-        window.confirm(
-          "Disable fingerprint login on this Android device?"
-        );
-
-      if (!confirmed) {
-        return;
-      }
-
-      setError("");
-      setMsg("");
-      setBiometricBusy(
-        true
-      );
-
-      try {
-        await NativeBiometric.deleteCredentials(
-          {
-            server:
-              NATIVE_BIOMETRIC_SERVER
-          }
-        );
-
-        localStorage.removeItem(
-          NATIVE_BIOMETRIC_ENABLED_KEY
-        );
-
-        setBiometricEnabled(
-          false
-        );
-
-        setMsg(
-          "Fingerprint login has been disabled on this Android device."
-        );
-      } catch (
-        e: any
-      ) {
-        setError(
-          getNativeBiometricErrorMessage(
-            e,
-            "Unable to disable fingerprint login."
-          )
-        );
-      } finally {
-        setBiometricBusy(
-          false
-        );
-      }
-    };
-
-  const nativeBiometricLogin =
-    async () => {
-      if (
-        !isNativeAndroidApp()
-      ) {
-        return;
-      }
-
-      if (
-        !nativeFingerprintAvailable
-      ) {
-        setError(
-          "Fingerprint authentication is not available on this Android device."
-        );
-
-        return;
-      }
-
-      setError("");
-      setMsg("");
-      setBiometricBusy(
-        true
-      );
-
-      try {
-        const credentials =
-          await NativeBiometric.getSecureCredentials(
-            {
-              server:
-                NATIVE_BIOMETRIC_SERVER,
-
-              reason:
-                "Authenticate with your fingerprint to sign in",
-
-              title:
-                "Unique Youth Login",
-
-              subtitle:
-                "Fingerprint authentication required",
-
-              description:
-                "Use your registered fingerprint to securely sign in to Unique Youth.",
-
-              negativeButtonText:
-                "Cancel"
-            }
-          );
-
-        const loginResult =
-          await api(
-            "/api/auth/login",
-            {
-              method:
-                "POST",
-
-              body:
-                JSON.stringify({
-                  usernameOrEmail:
-                    credentials.username,
-
-                  password:
-                    credentials.password,
-
-                  deviceId:
-                    getDeviceId()
-                })
-            }
-          );
-
-        sessionStorage.setItem(
-          TOKEN_KEY,
-          loginResult.token
-        );
-
-        localStorage.setItem(
-          HAS_REGISTERED_KEY,
-          "1"
-        );
-
-        setMemberToken(
-          loginResult.token
-        );
-
-        setMsg(
-          "Fingerprint login successful."
-        );
-      } catch (
-        e: any
-      ) {
-        const message =
-          getNativeBiometricErrorMessage(
-            e,
-            "Fingerprint authentication failed."
-          );
-
-        /*
-         * If the secure credential no longer exists, clear the local flag so
-         * the member can provision fingerprint login again from Profile.
-         */
-        if (
-          String(
-            e?.message ||
-              e ||
-              ""
-          )
-            .toLowerCase()
-            .includes("credential") ||
-          String(
-            e?.message ||
-              e ||
-              ""
-          )
-            .toLowerCase()
-            .includes("saved")
-        ) {
-          localStorage.removeItem(
-            NATIVE_BIOMETRIC_ENABLED_KEY
-          );
-
-          setBiometricEnabled(
-            false
-          );
-        }
-
-        setError(
-          message
-        );
-      } finally {
-        setBiometricBusy(
-          false
-        );
-      }
-    };
+      setError(message);
+    } finally {
+      setBiometricBusy(false);
+    }
+  };
 
   /* ==========================================================
    * WEB WEBAUTHN / PASSKEY
@@ -2717,7 +2521,7 @@ export default function App() {
       if (
         isNativeAndroidApp()
       ) {
-        await enableNativeBiometricLogin();
+        await startNativeBiometricEnrollment();
         return;
       }
 
@@ -3367,6 +3171,35 @@ export default function App() {
     };
 
   /* ==========================================================
+   * ANDROID BACK BUTTON HANDLER
+   * ========================================================== */
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const handler = () => {
+      if (location.pathname !== "/") {
+        navigate(-1);
+      } else if (mode !== "") {
+        // If on login/register, go back to landing
+        setMode("");
+        setLandingScrollPos(window.scrollY);
+        setTimeout(() => window.scrollTo(0, landingScrollPos), 50);
+      } else {
+        // Optionally exit the app
+        // App.exitApp();
+      }
+    };
+    const listener = BackButton.addListener("backButton", handler);
+    return () => {
+      listener.remove();
+    };
+  }, [location, navigate, mode, landingScrollPos]);
+
+  // ============================================================
+  // SCROLL DIRECTION FOR HEADER
+  // ============================================================
+  const headerVisible = useScrollDirection();
+
+  /* ==========================================================
    * NOT LOGGED IN
    * ========================================================== */
 
@@ -3406,7 +3239,9 @@ export default function App() {
 
       return (
         <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-          <header className="bg-blue-800 text-white px-3 sm:px-5 py-3 sm:py-4 flex justify-between items-center gap-3 flex-wrap">
+          <header className={`bg-blue-800 text-white px-3 sm:px-5 py-3 sm:py-4 flex justify-between items-center gap-3 flex-wrap sticky top-0 z-50 transition-transform duration-300 ${
+            headerVisible ? "translate-y-0" : "-translate-y-full"
+          }`}>
             <Brand />
 
             <div className="flex items-center gap-2 ml-auto">
@@ -4213,64 +4048,94 @@ export default function App() {
     );
   }
 
+  // ============================================================
+  // LOGGED IN – DASHBOARD
+  // ============================================================
   return (
-    <Dashboard
-      dashboard={
-        dashboard
-      }
-      announcements={
-        ann
-      }
-      onRefresh={
-        loadDashboard
-      }
-      theme={
-        theme
-      }
-      setTheme={
-        setTheme
-      }
-      onLogout={
-        onLogout
-      }
-      drawState={
-        drawState
-      }
-      drawRemaining={
-        drawRemaining
-      }
-      webAuthnSupported={
-        webAuthnSupported
-      }
-      platformAuthenticatorAvailable={
-        platformAuthenticatorAvailable
-      }
-      nativeBiometricAvailable={
-        nativeBiometricAvailable
-      }
-      nativeFingerprintAvailable={
-        nativeFingerprintAvailable
-      }
-      isNativeAndroid={
-        isNativeAndroidApp()
-      }
-      biometricBusy={
-        biometricBusy
-      }
-      biometricEnabled={
-        biometricEnabled
-      }
-      enableBiometricLogin={
-        enableBiometricLogin
-      }
-      disableBiometricLogin={
-        disableBiometricLogin
-      }
-      reportMonthlyPayment={
-        reportMonthlyPayment
-      }
-      isPaymentReportingOpen={isPaymentReportingOpen}
-    />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+      <Dashboard
+        dashboard={dashboard}
+        announcements={ann}
+        onRefresh={loadDashboard}
+        theme={theme}
+        setTheme={setTheme}
+        onLogout={onLogout}
+        drawState={drawState}
+        drawRemaining={drawRemaining}
+        webAuthnSupported={webAuthnSupported}
+        platformAuthenticatorAvailable={platformAuthenticatorAvailable}
+        nativeBiometricAvailable={nativeBiometricAvailable}
+        nativeFingerprintAvailable={nativeFingerprintAvailable}
+        isNativeAndroid={isNativeAndroidApp()}
+        biometricBusy={biometricBusy}
+        biometricEnabled={biometricEnabled}
+        enableBiometricLogin={enableBiometricLogin}
+        disableBiometricLogin={disableBiometricLogin}
+        reportMonthlyPayment={reportMonthlyPayment}
+        isPaymentReportingOpen={isPaymentReportingOpen}
+      />
+
+      {/* Floating Back button – only shown when not on home page */}
+      {location.pathname !== "/" && (
+        <button
+          onClick={() => navigate(-1)}
+          className="fixed bottom-6 left-4 z-40 bg-blue-800 text-white rounded-full p-3 shadow-lg hover:bg-blue-700 transition"
+          aria-label="Go back"
+        >
+          ← Back
+        </button>
+      )}
+
+      {/* Fingerprint password modal */}
+      {showFingerprintPasswordModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">
+              Enter password
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+              Enter your account password to enable fingerprint login.
+            </p>
+            {fingerprintPasswordError && (
+              <div className="p-3 mb-3 rounded bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 text-sm">
+                {fingerprintPasswordError}
+              </div>
+            )}
+            <input
+              type="password"
+              value={fingerprintPassword}
+              onChange={e => {
+                setFingerprintPassword(e.target.value);
+                setFingerprintPasswordError("");
+              }}
+              placeholder="Password"
+              className="w-full border dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-lg p-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFingerprintPasswordModal(false);
+                  setBiometricBusy(false);
+                }}
+                className="flex-1 py-3 rounded-lg border dark:border-slate-600 font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submitFingerprintPassword}
+                disabled={biometricBusy}
+                className="flex-1 py-3 rounded-lg bg-blue-800 text-white font-bold disabled:opacity-50"
+              >
+                {biometricBusy ? "Setting up..." : "Continue"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -4412,6 +4277,11 @@ function Dashboard({
     setShowPaymentConfirmation(false);
   };
 
+  // ============================================================
+  // SCROLL DIRECTION FOR HEADER (within Dashboard)
+  // ============================================================
+  const headerVisible = useScrollDirection();
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <AppUpdateBanner
@@ -4420,7 +4290,9 @@ function Dashboard({
         }
       />
 
-      <header className="bg-blue-800 text-white px-3 sm:px-4 py-3 sm:py-4">
+      <header className={`bg-blue-800 text-white px-3 sm:px-4 py-3 sm:py-4 sticky top-0 z-50 transition-transform duration-300 ${
+        headerVisible ? "translate-y-0" : "-translate-y-full"
+      }`}>
         <div className="flex items-center justify-between gap-3">
           <Brand />
 

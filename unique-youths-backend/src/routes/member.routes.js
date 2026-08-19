@@ -1190,8 +1190,9 @@ router.get(
         defaultRecipients:
           DEFAULT_RECIPIENTS_PER_MONTH,
 
+        // ✅ CORRECTED: removed the incorrect "max(3, …) × 2" formula
         maintenanceFeeFormula:
-          "₦500 × max(3, ceil(circle size ÷ 2)) × 2"
+          "₦500 × ceil(circle size ÷ 2)"
       }
     });
   }
@@ -1877,8 +1878,9 @@ router.get(
       DEFAULT_RECIPIENTS:
         DEFAULT_RECIPIENTS_PER_MONTH,
 
+      // ✅ CORRECTED: removed the incorrect "max(3, …) × 2" formula
       MAINTENANCE_FEE_FORMULA:
-        "₦500 × max(3, ceil(circle size ÷ 2)) × 2"
+        "₦500 × ceil(circle size ÷ 2)"
     });
   }
 );
