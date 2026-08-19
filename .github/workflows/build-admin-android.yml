@@ -28,10 +28,15 @@ jobs:
           cache: "npm"
           cache-dependency-path: unique-youths-admin/package-lock.json
 
+      # ✅ Use Java 17 for full compatibility
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "17"   # ✅ Use Java 17 for Android compatibility
+          java-version: "17"
+
+      # Print Java version for debugging
+      - name: Verify Java version
+        run: java -version
 
       - uses: android-actions/setup-android@v4
 
