@@ -255,7 +255,7 @@ export default function MonthlyDisbursals({ token, refreshKey }: { token: string
                   {getFeeScaleDisplay(activeCircle.baselineSize)}
                 </p>
                 <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                  Formula: ₦500 × ceil({activeCircle.baselineSize} ÷ 2) = {formatCurrency(500 * Math.ceil(activeCircle.baselineSize / 2))}
+                  Formula: ₦500 × max(3, ceil(circle size ÷ 2)) × 2 = {formatCurrency(500 * Math.ceil(activeCircle.baselineSize / 2))}
                 </p>
               </div>
               {activePayoutData.summary && (

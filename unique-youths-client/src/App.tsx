@@ -55,7 +55,7 @@ const rules = `1. Monthly contribution is ₦11,000: ₦10,000 goes into the sha
 7. Payment happens off-platform: send your contribution to the admin and share proof in the community. An admin confirms it here once received.
 8. Each month, the savings pot is formed from the ₦10,000 savings portion actually paid by members for that month. One or two eligible members may be selected at random, according to the circle's configured recipient count.
 9. The gross payout per selected recipient is the month's actual savings pot divided by the number of selected recipients.
-10. A separate maintenance fee is charged to each selected recipient. The maintenance fee scales with circle size as: ₦500 × ceil(circle size ÷ 2).
+10. A separate maintenance fee is charged to each selected recipient. The maintenance fee scales with circle size as: ₦500 × max(3, ceil(circle size ÷ 2)) × 2.
 11. The recipient's net payout is the gross payout minus the maintenance fee. The ₦1,000 party-fund contribution remains separate from the savings pot and recipient payout.
 12. Members must continue their monthly contribution obligations even after receiving a lump-sum payout.
 13. Members must not attempt to manipulate recipient selection or circle records.
