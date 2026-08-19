@@ -5,7 +5,7 @@ import {
   type ChangeEvent
 } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { BackButton } from "@capacitor/app";
+import { App } from "@capacitor/app";  // ✅ Correct import
 import { Capacitor } from "@capacitor/core";
 
 import {
@@ -3188,7 +3188,7 @@ export default function App() {
         // App.exitApp();
       }
     };
-    const listener = BackButton.addListener("backButton", handler);
+    const listener = App.addListener("backButton", handler);
     return () => {
       listener.remove();
     };
