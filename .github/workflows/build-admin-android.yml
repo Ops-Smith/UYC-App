@@ -73,6 +73,90 @@ jobs:
             echo "Android platform already exists, skipping add."
           fi
 
+      # Upgrade Gradle wrapper to 8.7 (no trailing spaces)
+      - name: Upgrade Gradle wrapper
+        working-directory: unique-youths-admin/android
+        run: |
+          sed -i 's/gradle-8.0.2-all.zip/gradle-8.7-all.zip/g' gradle/wrapper/gradle-wrapper.properties
+          # Remove any trailing spaces
+          sed -i 's/[ \t]*$//' gradle/wrapper/gradle-wrapper.properties
+
+      # Force Java 17 compatibility by rewriting app/build.gradle
+      - name: Force Java 17 compatibility
+        working-directory: unique-youths-admin/android
+        run: |
+          cat > app/build.gradle <<'EOF'
+          apply plugin: 'com.android.application'
+
+          android {
+              namespace "com.uniqueyouths.admin"
+              compileSdkVersion rootProject.ext.compileSdkVersion
+              defaultConfig {
+                  applicationId "com.uniqueyouths.admin"
+                  minSdkVersion rootProject.ext.minSdkVersion
+                  targetSdkVersion rootProject.ext.targetSdkVersion
+                  versionCode 1
+                  versionName "1.0"
+                  testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+                  aaptOptions {
+                      ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+                  }
+              }
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+
+          repositories {
+              flatDir{
+                  dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+              }
+          }
+
+          dependencies {
+              implementation fileTree(include: ['*.jar'], dir: 'libs')
+              implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+              implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+              implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+              implementation project(':capacitor-android')
+              testImplementation "junit:junit:$junitVersion"
+              androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+              androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+              implementation project(':capacitor-cordova-android-plugins')
+          }
+
+          apply from: 'capacitor.build.gradle'
+
+          try {
+              def servicesJSON = file('google-services.json')
+              if (servicesJSON.text) {
+                  apply plugin: 'com.google.gms.google-services'
+              }
+          } catch(Exception e) {
+              logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+          }
+          EOF
+
+      # Also upgrade AGP in the root build.gradle
+      - name: Upgrade Android Gradle Plugin
+        working-directory: unique-youths-admin/android
+        run: |
+          sed -i 's/classpath '\''com.android.tools.build:gradle:8.0.0'\''/classpath '\''com.android.tools.build:gradle:8.6.1'\''/g' build.gradle
+
+      # Upgrade SDK versions in variables.gradle
+      - name: Upgrade SDK versions
+        working-directory: unique-youths-admin/android
+        run: |
+          sed -i 's/compileSdkVersion = 33/compileSdkVersion = 35/g' variables.gradle
+          sed -i 's/targetSdkVersion = 33/targetSdkVersion = 35/g' variables.gradle
+
       - name: Copy icon for asset generation
         run: |
           mkdir -p assets
@@ -85,22 +169,6 @@ jobs:
         run: npx cap sync android
         env:
           ADMIN_APP_URL: ${{ vars.ADMIN_APP_URL }}
-
-      # ✅ FIX: Force Java 17 compatibility in app/build.gradle
-      - name: Force Java 17 compatibility
-        working-directory: unique-youths-admin/android
-        run: |
-          echo "=== Before modification ==="
-          grep -A5 "compileOptions" app/build.gradle || echo "No compileOptions found"
-
-          # Remove any existing compileOptions block
-          sed -i '/compileOptions {/,/}/d' app/build.gradle
-
-          # Insert new compileOptions block after android {
-          sed -i '/android {/a \ \ \ \ compileOptions {\n        sourceCompatibility JavaVersion.VERSION_17\n        targetCompatibility JavaVersion.VERSION_17\n    }' app/build.gradle
-
-          echo "=== After modification ==="
-          grep -A5 "compileOptions" app/build.gradle || echo "Insertion failed"
 
       - name: Decode signing keystore (if configured)
         id: signing
