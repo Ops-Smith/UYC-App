@@ -28,13 +28,18 @@ jobs:
           cache: "npm"
           cache-dependency-path: unique-youths-admin/package-lock.json
 
-      # ✅ Use Java 17 for full compatibility
+      # ✅ Use Java 17 and set it as the default for the whole job
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
+          java-package: jdk
+          architecture: x64
 
-      # Print Java version for debugging
+      # ✅ Force JAVA_HOME environment variable for Gradle
+      - name: Set JAVA_HOME
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
+
       - name: Verify Java version
         run: java -version
 
