@@ -31,7 +31,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
 
       - name: Verify Java version
         run: java -version
@@ -81,8 +81,8 @@ jobs:
           # Remove any trailing spaces
           sed -i 's/[ \t]*$//' gradle/wrapper/gradle-wrapper.properties
 
-      # Force Java 17 compatibility by rewriting app/build.gradle
-      - name: Force Java 17 compatibility
+      # Force Java 21 compatibility by rewriting app/build.gradle
+      - name: Force Java 21 compatibility
         working-directory: unique-youths-admin/android
         run: |
           cat > app/build.gradle <<'EOF'
