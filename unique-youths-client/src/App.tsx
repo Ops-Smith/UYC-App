@@ -2305,13 +2305,27 @@ export default function App() {
       return;
     }
 
+    // 1. Require username input
+    const enteredUsername = loginForm.usernameOrEmail.trim();
+    if (!enteredUsername) {
+      setError("Enter your username or email first, then tap 'Log in with fingerprint'.");
+      return;
+    }
+
     setError("");
     setMsg("");
     setBiometricBusy(true);
 
     try {
+      // 2. Retrieve stored credentials (this triggers the fingerprint prompt)
       const credentials = await loginWithNativeBiometric();
 
+      // 3. Verify that the stored username matches the entered one (case‑insensitive)
+      if (credentials.username.toLowerCase() !== enteredUsername.toLowerCase()) {
+        throw new Error("The fingerprint credentials are for a different username. Please log in with password and re‑enable fingerprint.");
+      }
+
+      // 4. Perform login using the retrieved password
       const loginResult = await api("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({

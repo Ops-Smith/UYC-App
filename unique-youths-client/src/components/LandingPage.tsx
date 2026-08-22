@@ -1,10 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-// NEW IMPORTS for biometric
-import {
-  isNativeMobileApp,
-  checkNativeBiometricAvailability,
-  loginWithNativeBiometric,
-} from '../lib/nativeBiometric';
 
 export interface LandingPageProps {
   onNavigateLogin: () => void;
@@ -57,13 +51,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [showServiceCharge, setShowServiceCharge] = useState(false);
 
   // ============================================================
-  // BIOMETRIC STATE
-  // ============================================================
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricLoading, setBiometricLoading] = useState(false);
-  const [biometricError, setBiometricError] = useState<string | null>(null);
-
-  // ============================================================
   // SCROLL DIRECTION FOR HEADER HIDE/SHOW
   // ============================================================
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -90,19 +77,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // ============================================================
-  // CHECK BIOMETRIC AVAILABILITY ON MOUNT (NATIVE ONLY)
-  // ============================================================
-  useEffect(() => {
-    if (isNativeMobileApp()) {
-      checkNativeBiometricAvailability()
-        .then(({ available, strongBiometryAvailable }) => {
-          setBiometricAvailable(available && strongBiometryAvailable);
-        })
-        .catch(() => setBiometricAvailable(false));
-    }
-  }, []);
-
   const prevSlide = () => {
     setCurrentSlide(
       (prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length
@@ -123,26 +97,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       return;
     }
     onGetStarted?.();
-  };
-
-  // ============================================================
-  // BIOMETRIC LOGIN HANDLER
-  // ============================================================
-  const handleBiometricLogin = async () => {
-    setBiometricLoading(true);
-    setBiometricError(null);
-    try {
-      const credentials = await loginWithNativeBiometric();
-      // credentials.username and credentials.password are now available
-      // You can store them in a global state/context or pass them to the next screen.
-      // For now, we simply navigate to the login page (or main app) on success.
-      console.log('Biometric login successful for user:', credentials.username);
-      onNavigateLogin(); // Navigate to the login page – you can replace with a direct dashboard navigation if you have a prop for that.
-    } catch (err) {
-      setBiometricError(err instanceof Error ? err.message : 'Biometric login failed');
-    } finally {
-      setBiometricLoading(false);
-    }
   };
 
   return (
@@ -212,33 +166,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               community. Transparent tracking, scaled payouts, and reliable
               peer backing.
             </p>
-            <div className="flex flex-col sm:flex-row items-center gap-3 mt-2">
+            <div className="flex justify-center mt-2">
               <button
                 onClick={handleGetStarted}
                 className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-2xl shadow-lg transition transform hover:-translate-y-0.5 text-sm sm:text-lg"
               >
                 Get Started
               </button>
-              {/* BIOMETRIC BUTTON – shown only if available */}
-              {biometricAvailable && (
-                <button
-                  onClick={handleBiometricLogin}
-                  disabled={biometricLoading}
-                  className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-2xl shadow-lg transition transform hover:-translate-y-0.5 text-sm sm:text-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {biometricLoading ? (
-                    'Authenticating...'
-                  ) : (
-                    <>
-                      <span>🔐</span> Login with Fingerprint
-                    </>
-                  )}
-                </button>
-              )}
             </div>
-            {biometricError && (
-              <p className="text-red-300 text-sm mt-1 font-semibold">{biometricError}</p>
-            )}
           </div>
         </section>
 
